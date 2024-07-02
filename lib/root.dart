@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sky_snap/screens/home/main_screen.dart';
 import 'package:sky_snap/screens/splash_screen.dart';
+import 'package:sky_snap/utils/navigation.dart';
 
 class Root extends StatefulWidget {
   const Root({super.key});
@@ -8,7 +10,7 @@ class Root extends StatefulWidget {
   RootState createState() => RootState();
 }
 
-class RootState extends State<Root> with WidgetsBindingObserver {
+class RootState extends State<Root> {
   @override
   void initState() {
     changeScreen();
@@ -16,15 +18,13 @@ class RootState extends State<Root> with WidgetsBindingObserver {
   }
 
   @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return const SplashScreen();
   }
 
-  void changeScreen() {}
+  void changeScreen() {
+    Future.delayed(const Duration(seconds: 5), () {
+      replaceScreen(context, const MyHomePage());
+    });
+  }
 }

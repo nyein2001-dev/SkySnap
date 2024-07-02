@@ -9,12 +9,12 @@ ThemeData get lightTheme => ThemeData.light(useMaterial3: false).copyWith(
         elevation: 0,
       ),
       radioTheme: RadioThemeData(
-        fillColor: MaterialStateProperty.all(primaryColor),
+        fillColor: WidgetStateProperty.all(primaryColor),
       ),
       colorScheme: ColorScheme.light(
         primary: primaryColor,
         onPrimary: Colors.white,
-        background: backgroundLight,
+        onSurface: backgroundLight,
         secondary: secondaryColor,
         brightness: Brightness.light,
         shadow: shadowColor,
@@ -26,7 +26,7 @@ ThemeData get darkTheme => ThemeData.dark(useMaterial3: false).copyWith(
       primaryColor: primaryColor,
       scaffoldBackgroundColor: backgroundDark,
       radioTheme: RadioThemeData(
-        fillColor: MaterialStateProperty.all(primaryColor),
+        fillColor: WidgetStateProperty.all(primaryColor),
       ),
       appBarTheme: const AppBarTheme(
         centerTitle: true,
@@ -35,7 +35,7 @@ ThemeData get darkTheme => ThemeData.dark(useMaterial3: false).copyWith(
       colorScheme: ColorScheme.dark(
         primary: primaryColor,
         onPrimary: Colors.white,
-        background: backgroundDark,
+        onSurface: backgroundDark,
         secondary: secondaryColor,
         brightness: Brightness.dark,
         shadow: shadowColor,
