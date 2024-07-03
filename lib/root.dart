@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sky_snap/screens/home/main_screen.dart';
+import 'package:sky_snap/screens/place_details/weather_details_screen.dart';
 import 'package:sky_snap/screens/splash_screen.dart';
 import 'package:sky_snap/utils/navigation.dart';
 
@@ -24,7 +24,7 @@ class RootState extends State<Root> {
 
   void changeScreen() {
     Future.delayed(const Duration(seconds: 5), () {
-      replaceScreen(context, const MyHomePage());
+      replaceScreen(context, const WeatherDetailsScreen());
     });
   }
 }

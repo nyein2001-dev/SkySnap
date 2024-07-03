@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sky_snap/api/models/city.dart';
 import 'package:sky_snap/screens/place_search/local_places_screen.dart';
+import 'package:sky_snap/utils/strings.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, this.title});
@@ -34,7 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: PlaceAutoCompleteTextField(
         textEditingController: controller,
-        openWeatherAPIKey: "5a24837e6c003c67e54c7d0538cc4744",
+        openWeatherAPIKey: openWeatherAPIKey,
         inputDecoration: const InputDecoration(
           hintText: "Search for a city",
           border: InputBorder.none,
