@@ -41,6 +41,7 @@ dependencies:
   rxdart: ^0.28.0
   weather_icons: ^3.0.0
   fl_chart: ^0.68.0
+  page_view_dot_indicator: ^2.3.0
 
 dev_dependencies:
   flutter_test:

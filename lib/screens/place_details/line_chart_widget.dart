@@ -49,7 +49,9 @@ class _LineChartWidgetState extends State<LineChartWidget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 40,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: temperatures
@@ -63,7 +65,9 @@ class _LineChartWidgetState extends State<LineChartWidget> {
               child: LineChart(mainData()),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 25,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(temperatures.length, (index) {
@@ -88,7 +92,7 @@ class _LineChartWidgetState extends State<LineChartWidget> {
     spots.add(const FlSpot(0.5, 3)); // Second spot
 
     for (int i = 1; i < temperatures.length - 1; i++) {
-      spots.add(FlSpot(i + 0.5, temperatures[i] - 22));
+      spots.add(FlSpot(i + 0.5, temperatures[i] - 21));
     }
     spots.add(FlSpot(temperatures.length.toDouble() - 0.5,
         temperatures.last - 20)); // Last spot
@@ -152,24 +156,27 @@ class TemperatureDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 4.0),
-          child: Text(
-            temp.toString(),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 4.0),
+            child: Text(
+              temp.toString(),
+            ),
           ),
-        ),
-        const Text(
-          'o',
-          style: TextStyle(
-            fontSize: 5,
-            fontWeight: FontWeight.bold,
+          const Text(
+            'o',
+            style: TextStyle(
+              fontSize: 5,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
