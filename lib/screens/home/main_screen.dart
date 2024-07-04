@@ -37,19 +37,19 @@ class _MyHomePageState extends State<MyHomePage> {
         textEditingController: controller,
         openWeatherAPIKey: openWeatherAPIKey,
         inputDecoration: const InputDecoration(
-          hintText: "Search for a city",
+          hintText: "Enter Location",
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
         ),
         debounceTime: 400,
-        itemClick: (City prediction) {
-          controller.text = prediction.name;
+        itemClick: (City suggestion) {
+          controller.text = suggestion.name;
           controller.selection = TextSelection.fromPosition(
-              TextPosition(offset: prediction.name.length));
+              TextPosition(offset: suggestion.name.length));
         },
         seperatedBuilder: const Divider(),
         containerHorizontalPadding: 10,
-        itemBuilder: (context, index, City prediction) {
+        itemBuilder: (context, index, City suggestion) {
           return Container(
             color: Colors.transparent,
             padding: const EdgeInsets.all(10),
@@ -59,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 const SizedBox(
                   width: 7,
                 ),
-                Expanded(child: Text(prediction.name))
+                Expanded(child: Text(suggestion.name))
               ],
             ),
           );

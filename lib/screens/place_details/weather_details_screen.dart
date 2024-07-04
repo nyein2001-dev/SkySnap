@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:sky_snap/screens/home/main_screen.dart';
+import 'package:sky_snap/screens/place_details/line_chart_widget.dart';
+import 'package:sky_snap/screens/place_details/weekly_details_screen.dart';
 import 'package:sky_snap/utils/colors.dart';
+import 'package:sky_snap/utils/navigation.dart';
+import 'package:sky_snap/utils/weather_icon.dart';
 
 class WeatherDetailsScreen extends StatefulWidget {
   const WeatherDetailsScreen({super.key});
@@ -72,28 +77,30 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
               end: Alignment.centerRight,
             ),
             color: Colors.lightBlueAccent),
-        child: Scaffold(
-            appBar: AppBar(
-              title: const Text(
-                "Yangon",
-                style: TextStyle(color: Colors.white),
+        child: Stack(fit: StackFit.expand, children: [
+          Image.asset(
+            'assets/background_world.png',
+            fit: BoxFit.fitHeight,
+            color: primaryColor.withOpacity(0.5),
+          ),
+          Scaffold(
+              appBar: AppBar(
+                title: const Text(
+                  "Yangon",
+                  style: TextStyle(color: Colors.white),
+                ),
+                leading: IconButton(
+                    onPressed: () {
+                      startScreen(context, const MyHomePage());
+                    },
+                    icon: const Icon(
+                      Icons.add_outlined,
+                      color: Colors.white,
+                    )),
+                backgroundColor: Colors.transparent,
               ),
-              leading: IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.add_outlined,
-                    color: Colors.white,
-                  )),
               backgroundColor: Colors.transparent,
-            ),
-            backgroundColor: Colors.transparent,
-            body: Stack(fit: StackFit.expand, children: [
-              Image.asset(
-                'assets/background_world.png',
-                fit: BoxFit.fitHeight,
-                color: primaryColor.withOpacity(0.5),
-              ),
-              SingleChildScrollView(
+              body: SingleChildScrollView(
                   child: Padding(
                       padding: const EdgeInsets.all(10),
                       child: Column(
@@ -227,7 +234,7 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
                                 ],
                               )),
                           SizedBox(
-                            height: MediaQuery.of(context).size.height / 2.5,
+                            height: MediaQuery.of(context).size.height / 2.75,
                             child: Container(
                               decoration: BoxDecoration(
                                 color: Colors.transparent,
@@ -238,8 +245,227 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
                                   ),
                                 ],
                               ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Container(
+                                              height: 20,
+                                              width: 20,
+                                              decoration: BoxDecoration(
+                                                color: Colors.transparent,
+                                                borderRadius:
+                                                    BorderRadius.circular(25.0),
+                                                boxShadow: const [
+                                                  BoxShadow(
+                                                    color: Color.fromARGB(
+                                                        255, 228, 212, 212),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: const Icon(
+                                                Icons.calendar_month_outlined,
+                                                size: 12,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              width: 10,
+                                            ),
+                                            const Text(
+                                              '5-day forecast',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold),
+                                            )
+                                          ],
+                                        ),
+                                        InkWell(
+                                          child: const Row(
+                                            children: [
+                                              Text('More details'),
+                                              Icon(
+                                                Icons.arrow_forward_ios,
+                                                size: 12,
+                                              )
+                                            ],
+                                          ),
+                                          onTap: () {
+                                            startScreen(context,
+                                                const WeeklyDetailsScreen());
+                                          },
+                                        )
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              getWeatherIcon('03d'),
+                                            ),
+                                            const SizedBox(
+                                              width: 5,
+                                            ),
+                                            const Text(
+                                              'Today',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold),
+                                            )
+                                          ],
+                                        ),
+                                        Text(
+                                          toTitleCase(
+                                            'scattered clouds',
+                                          ),
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        const Text(
+                                          '32/26',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold),
+                                        )
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              getWeatherIcon('03d'),
+                                            ),
+                                            const SizedBox(
+                                              width: 5,
+                                            ),
+                                            const Text('Today')
+                                          ],
+                                        ),
+                                        Text(toTitleCase('scattered clouds')),
+                                        const Text('32/26')
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              getWeatherIcon('03d'),
+                                            ),
+                                            const SizedBox(
+                                              width: 5,
+                                            ),
+                                            const Text('Today')
+                                          ],
+                                        ),
+                                        Text(toTitleCase('scattered clouds')),
+                                        const Text('32/26')
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              getWeatherIcon('03d'),
+                                            ),
+                                            const SizedBox(
+                                              width: 5,
+                                            ),
+                                            const Text('Today')
+                                          ],
+                                        ),
+                                        Text(toTitleCase('scattered clouds')),
+                                        const Text('32/26')
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              getWeatherIcon('03d'),
+                                            ),
+                                            const SizedBox(
+                                              width: 5,
+                                            ),
+                                            const Text('Today')
+                                          ],
+                                        ),
+                                        Text(toTitleCase('scattered clouds')),
+                                        const Text('32/26')
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          SizedBox(
+                              height: MediaQuery.of(context).size.height / 3.5,
+                              child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    borderRadius: BorderRadius.circular(15.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.blue.withOpacity(0.5),
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Padding(
+                                      padding: EdgeInsets.all(10),
+                                      child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons
+                                                      .access_time_filled_outlined,
+                                                  size: 20,
+                                                  color: Color.fromARGB(
+                                                      255, 228, 212, 212),
+                                                ),
+                                                SizedBox(
+                                                  width: 5,
+                                                ),
+                                                Text(
+                                                  '24-hour forecast',
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                )
+                                              ],
+                                            ),
+                                            LineChartWidget(),
+                                          ])))),
                           const SizedBox(
                             height: 10,
                           ),
@@ -446,7 +672,14 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
                             ),
                           )
                         ],
-                      )))
-            ])));
+                      ))))
+        ]));
+  }
+
+  String toTitleCase(String str) {
+    return str
+        .split(' ')
+        .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
+        .join(' ');
   }
 }
