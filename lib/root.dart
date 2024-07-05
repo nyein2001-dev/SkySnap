@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:sky_snap/api/models/city.dart';
 import 'package:sky_snap/api/models/hourly_weather.dart';
 import 'package:sky_snap/api/models/weather.dart';
 import 'package:sky_snap/screens/place_details/weather_details_screen.dart';
@@ -68,7 +69,19 @@ class RootState extends State<Root> {
     } else {
       throw Exception('Failed to load weather data');
     }
-    replaceScreen(context, const WeatherDetailsScreen());
+
+    replaceScreen(
+      context,
+      WeatherDetailsScreen(
+        fromMain: true,
+        city: City(
+            name: "Mumbai",
+            lat: 19.0144,
+            lon: 72.8479,
+            country: "IN",
+            state: "Maharashtra"),
+      ),
+    );
   }
 
   // void changeScreen() {

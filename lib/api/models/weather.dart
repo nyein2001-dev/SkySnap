@@ -40,6 +40,52 @@ class Weather {
       required this.lat,
       required this.lon});
 
+  Map<String, dynamic> toSharedJson() {
+    return {
+      'name': name,
+      'temp': temp,
+      'feelsLike': feelsLike,
+      'tempMin': tempMin,
+      'tempMax': tempMax,
+      'pressure': pressure,
+      'humidity': humidity,
+      'visibility': visibility,
+      'windSpeedKmh': windSpeedKmh,
+      'windDeg': windDeg,
+      'description': description,
+      'iconCode': iconCode,
+      'windDirection': windDirection,
+      'sunrise': sunrise,
+      'sunset': sunset,
+      'chanceOfRain': chanceOfRain,
+      'lat': lat,
+      'lon': lon,
+    };
+  }
+
+  factory Weather.fromSharedJson(Map<String, dynamic> json) {
+    return Weather(
+      name: json['name'],
+      temp: json['temp'],
+      feelsLike: json['feelsLike'],
+      tempMin: json['tempMin'],
+      tempMax: json['tempMax'],
+      pressure: json['pressure'],
+      humidity: json['humidity'],
+      visibility: json['visibility'],
+      windSpeedKmh: json['windSpeedKmh'],
+      windDeg: json['windDeg'],
+      description: json['description'],
+      iconCode: json['iconCode'],
+      windDirection: json['windDirection'],
+      sunrise: json['sunrise'],
+      sunset: json['sunset'],
+      chanceOfRain: json['chanceOfRain'],
+      lat: json['lat'],
+      lon: json['lon'],
+    );
+  }
+
   factory Weather.fromJson(Map<String, dynamic> json) {
     double windSpeedMps = json['wind']['speed'];
     double windSpeedKmh = windSpeedMps * 3.6;

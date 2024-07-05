@@ -28,6 +28,26 @@ class WeatherData {
         icon: json['weather'][0]['icon'],
         windSpeedKmh: windSpeedKmh);
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'dt': dt,
+      'main': {
+        'temp': temp + 273.15,
+        'temp_min': tempMin + 273.15,
+        'temp_max': tempMax + 273.15,
+      },
+      'weather': [
+        {
+          'description': description,
+          'icon': icon,
+        }
+      ],
+      'wind': {
+        'speed': windSpeedKmh / 3.6,
+      },
+    };
+  }
 }
 
 class WeatherResponse {
@@ -44,5 +64,12 @@ class WeatherResponse {
       name: json['city']['name'],
       list: weatherList,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'city': {'name': name},
+      'list': list.map((weather) => weather.toJson()).toList(),
+    };
   }
 }

@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sky_snap/api/models/city.dart';
 import 'package:sky_snap/utils/dio_error_handler.dart';
+import 'package:sky_snap/utils/navigation.dart';
 
 class PlaceAutoCompleteTextField extends StatefulWidget {
   final InputDecoration inputDecoration;
@@ -64,11 +65,6 @@ class _PlaceAutoCompleteTextFieldState
             horizontal: widget.containerHorizontalPadding ?? 0,
             vertical: widget.containerVerticalPadding ?? 0),
         alignment: Alignment.centerLeft,
-        decoration: widget.boxDecoration ??
-            BoxDecoration(
-                shape: BoxShape.rectangle,
-                border: Border.all(color: Colors.grey, width: 0.6),
-                borderRadius: const BorderRadius.all(Radius.circular(10))),
         child: Row(
           mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -78,6 +74,8 @@ class _PlaceAutoCompleteTextFieldState
                 decoration: widget.inputDecoration,
                 style: widget.textStyle,
                 controller: widget.textEditingController,
+                // autocorrect: true,
+                autofocus: true,
                 onChanged: (string) {
                   subject.add(string);
                   if (widget.isCrossBtnShown) {
@@ -88,11 +86,37 @@ class _PlaceAutoCompleteTextFieldState
               ),
             ),
             (!widget.isCrossBtnShown)
-                ? const SizedBox()
+                ? InkWell(
+                    onTap: () {
+                      closeScreen(context);
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.only(left: 5),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                            color: Colors.blue,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ))
                 : isCrossBtn && _showCrossIconWidget()
                     ? IconButton(
                         onPressed: clearData, icon: const Icon(Icons.close))
-                    : const SizedBox()
+                    : InkWell(
+                        onTap: () {
+                          closeScreen(context);
+                        },
+                        child: const Padding(
+                          padding: EdgeInsets.only(left: 5),
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(
+                                color: Colors.blue,
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ))
           ],
         ),
       ),
@@ -235,7 +259,7 @@ class _PlaceAutoCompleteTextFieldState
   }
 
   _showSnackBar(String errorData) {
-    if (widget.showError) {
+    if (widget.showError && mounted) {
       final snackBar = SnackBar(
         content: Text(errorData),
       );

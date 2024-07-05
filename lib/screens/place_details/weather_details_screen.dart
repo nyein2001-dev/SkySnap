@@ -1,21 +1,27 @@
 import 'package:dio/dio.dart';
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:page_view_dot_indicator/page_view_dot_indicator.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:sky_snap/api/models/city.dart';
 import 'package:sky_snap/api/models/hourly_weather.dart';
 import 'package:sky_snap/api/models/weather.dart';
-import 'package:sky_snap/screens/home/main_screen.dart';
 import 'package:sky_snap/screens/place_details/line_chart_widget.dart';
+import 'package:sky_snap/screens/place_details/manage_city_screen.dart';
 import 'package:sky_snap/screens/place_details/weekly_details_screen.dart';
 import 'package:sky_snap/utils/colors.dart';
 import 'package:sky_snap/utils/navigation.dart';
+import 'package:sky_snap/utils/shared_preference.dart';
 import 'package:sky_snap/utils/strings.dart';
 import 'package:sky_snap/utils/weather_icon.dart';
 import 'dart:math' as math;
 
 class WeatherDetailsScreen extends StatefulWidget {
-  const WeatherDetailsScreen({super.key});
+  final City city;
+  final bool fromMain;
+  const WeatherDetailsScreen(
+      {super.key, required this.city, required this.fromMain});
 
   @override
   State<WeatherDetailsScreen> createState() => _WeatherDetailsScreenState();
@@ -30,9 +36,30 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
   late Dio _dio;
   bool loading = true;
   double uv = 0;
+  City city = City(
+      name: "Mumbai",
+      lat: 19.0144,
+      lon: 72.8479,
+      country: "IN",
+      state: "Maharashtra");
+  List<Weather> weatherList = Preferences.getWeathers();
+
+  late EasyRefreshController _controller;
+  bool showAddCartButton = false;
 
   @override
   void initState() {
+    super.initState();
+    city = widget.city;
+    weatherList = Preferences.getWeathers();
+    if (!widget.fromMain) {
+      showAddCartButton = weatherList.isEmpty ||
+          !weatherList.any((data) => data.name == city.name);
+    }
+    _controller = EasyRefreshController(
+      controlFinishRefresh: true,
+      controlFinishLoad: true,
+    );
     selectedPage = 0;
     _dio = Dio();
     _pageController = PageController(initialPage: selectedPage);
@@ -42,10 +69,10 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
 
   void getForecast() async {
     String url =
-        "https://api.openweathermap.org/data/2.5/weather?q=Bangkok,th&APPID=$openWeatherAPIKey";
+        "https://api.openweathermap.org/data/2.5/weather?q=${city.name},${city.country}&APPID=$openWeatherAPIKey";
 
     String hourlyWeatherUrl =
-        "https://api.openweathermap.org/data/2.5/forecast?q=Bangkok,th&appid=$openWeatherAPIKey";
+        "https://api.openweathermap.org/data/2.5/forecast?q=${city.name},${city.country}&appid=$openWeatherAPIKey";
 
     Response response = await _dio.get(url);
     if (response.statusCode == 200) {
@@ -57,7 +84,7 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
     }
 
     String uvUrl =
-        "https://api.openweathermap.org/data/2.5/uvi?lat=${weather.lat}&lon=${weather.lon}&appid=$openWeatherAPIKey";
+        "https://api.openweathermap.org/data/2.5/uvi?lat=${city.lat}&lon=${city.lon}&appid=$openWeatherAPIKey";
 
     Response uvResponse = await _dio.get(uvUrl);
     if (uvResponse.statusCode == 200) {
@@ -101,10 +128,58 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
           Scaffold(
             appBar: _buildAppBar(context),
             backgroundColor: Colors.transparent,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
+            floatingActionButton: showAddCartButton && !widget.fromMain
+                ? Container(
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(25.0),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color.fromARGB(255, 151, 150, 150),
+                        ),
+                      ],
+                    ),
+                    child: FloatingActionButton.extended(
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      onPressed: () {
+                        List<Weather> weatherList = Preferences.getWeathers();
+                        if (weatherList.length < 6) {
+                          weatherList.add(weather);
+                          Preferences.setWeathers(value: weatherList);
+                          List<WeatherResponse> weatherDataList =
+                              Preferences.getForecastWeathers();
+                          weatherDataList.add(weatherResponse);
+                          Preferences.setForecastWeathers(
+                              value: weatherDataList);
+                          showAddCartButton = false;
+                          setState(() {});
+                          const snackBar = SnackBar(
+                            content: Text('Successfully Saved.'),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        } else {
+                          const snackBar = SnackBar(
+                            content: Text('You have been 5 items'),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        }
+                      },
+                      label: const Text(
+                        'Add to start page',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      icon:
+                          const Icon(Icons.add, color: Colors.white, size: 25),
+                    ),
+                  )
+                : null,
             body: SafeArea(
               child: Column(
                 children: [
-                  if (pageCount > 1) _buildPageIndicator(pageCount),
+                  if (pageCount > 1 && widget.fromMain) _buildPageIndicator(pageCount),
                   Expanded(
                     child: _buildPageView(pageCount),
                   ),
@@ -120,19 +195,23 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
+      automaticallyImplyLeading: !widget.fromMain,
+      iconTheme: const IconThemeData(color: Colors.white),
       title: Text(
-        loading ? '' : weather.name,
+        city.name,
         style: const TextStyle(color: Colors.white),
       ),
-      leading: IconButton(
-        onPressed: () {
-          startScreen(context, const MyHomePage());
-        },
-        icon: const Icon(
-          Icons.add_outlined,
-          color: Colors.white,
-        ),
-      ),
+      leading: !widget.fromMain
+          ? null
+          : IconButton(
+              onPressed: () {
+                startScreen(context, const ManageCityScreen());
+              },
+              icon: const Icon(
+                Icons.add_outlined,
+                color: Colors.white,
+              ),
+            ),
       backgroundColor: Colors.transparent,
     );
   }
@@ -176,70 +255,84 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
 
   Widget _buildPageContent(BuildContext context) {
     return Center(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Column(
-            children: [
-              loading
-                  ? Shimmer.fromColors(
-                      baseColor: Colors.grey[300]!,
-                      highlightColor: Colors.grey[100]!,
-                      child: Container(
-                        width: MediaQuery.of(context).size.height / 2,
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(15.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.blue.withOpacity(0.5),
+      child: EasyRefresh(
+          controller: _controller,
+          refreshOnStart: true,
+          header: const ClassicHeader(),
+          footer: null,
+          onRefresh: () {
+            getForecast();
+            _controller.finishRefresh();
+            _controller.resetFooter();
+          },
+          onLoad: () async {
+            // getForecast();
+            _controller.finishLoad(IndicatorResult.none);
+          },
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Column(
+                children: [
+                  loading
+                      ? Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Container(
+                            width: MediaQuery.of(context).size.height / 2,
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(15.0),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.blue.withOpacity(0.5),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ))
-                  : SizedBox(
-                      height: MediaQuery.of(context).size.height / 2,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          _TemperatureDisplay(
-                            weather: weather,
+                          ))
+                      : SizedBox(
+                          height: MediaQuery.of(context).size.height / 2,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              _TemperatureDisplay(
+                                weather: weather,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                  const SizedBox(height: 10),
+                  _buildForecastContainer(context),
+                  const SizedBox(height: 10),
+                  _build24HourForecastContainer(),
+                  const SizedBox(height: 10),
+                  _buildWeatherDetailsRow(context),
+                  const SizedBox(height: 10),
+                  const Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "SkySnap has been developed by ",
+                          style: TextStyle(
+                            fontSize: 8,
+                          ),
+                        ),
+                        Text(
+                          " 🌐 Nyein Chan Toe",
+                          style: TextStyle(
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
-              const SizedBox(height: 10),
-              _buildForecastContainer(context),
-              const SizedBox(height: 10),
-              _build24HourForecastContainer(),
-              const SizedBox(height: 10),
-              _buildWeatherDetailsRow(context),
-              const SizedBox(height: 10),
-              const Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "SkySnap has been developed by ",
-                      style: TextStyle(
-                        fontSize: 8,
-                      ),
-                    ),
-                    Text(
-                      " 🌐 Nyein Chan Toe",
-                      style: TextStyle(
-                        fontSize: 8,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
+          )),
     );
   }
 
