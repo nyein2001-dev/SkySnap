@@ -18,6 +18,18 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   TextEditingController controller = TextEditingController();
 
+  bool isTextFieldEmpty = true;
+
+  @override
+  void initState() {
+    super.initState();
+    controller.addListener(() {
+      setState(() {
+        isTextFieldEmpty = controller.text.isEmpty;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -47,20 +59,21 @@ class _MyHomePageState extends State<MyHomePage> {
                   const SizedBox(height: 30),
                   placesAutoCompleteTextField(),
                   const SizedBox(height: 20),
-                  Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Popular cities',
-                            style: TextStyle(color: Colors.blueGrey),
-                          ),
-                          const SizedBox(height: 10),
-                          PopularCityGroup(),
-                        ],
-                      )),
+                  if (isTextFieldEmpty)
+                    Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Popular cities',
+                              style: TextStyle(color: Colors.blueGrey),
+                            ),
+                            const SizedBox(height: 10),
+                            PopularCityGroup(),
+                          ],
+                        )),
                 ],
               ),
             )
