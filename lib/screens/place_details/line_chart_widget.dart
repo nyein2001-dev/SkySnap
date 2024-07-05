@@ -23,6 +23,7 @@ class _LineChartWidgetState extends State<LineChartWidget> {
   final List<String> times = [];
   final List<String> iconCode = [];
   int smallestTemperature = 100;
+  int temperatureDifference = 0;
 
   @override
   void initState() {
@@ -34,6 +35,11 @@ class _LineChartWidgetState extends State<LineChartWidget> {
     }
     smallestTemperature =
         temperatures.reduce((current, next) => current < next ? current : next);
+    int largestTemperature =
+        temperatures.reduce((current, next) => current > next ? current : next);
+
+    temperatureDifference = largestTemperature - smallestTemperature;
+
     super.initState();
   }
 
@@ -72,7 +78,7 @@ class _LineChartWidgetState extends State<LineChartWidget> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: 25,
+                horizontal: 14,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -91,23 +97,28 @@ class _LineChartWidgetState extends State<LineChartWidget> {
     );
   }
 
-  LineChartData mainData() {
+  List<FlSpot> generateFlSpots(List<int> temperatures, int smallestTemperature,
+      int temperatureDifference) {
     List<FlSpot> spots = [];
-    spots.clear();
-    spots.add(
-        FlSpot(0, (temperatures.first - smallestTemperature).toDouble() * 0.5));
-    spots.add(FlSpot(
-        0.5, (temperatures.first - smallestTemperature).toDouble() * 0.5));
+    double scale = (temperatureDifference > 4) ? 0.5 : 1;
+    double offset = (temperatureDifference > 4) ? 0 : 1;
+    double computeYValue(int temperature) {
+      return (temperature - smallestTemperature).toDouble() * scale + offset;
+    }
 
+    spots.add(FlSpot(0, computeYValue(temperatures.first)));
+    spots.add(FlSpot(0.5, computeYValue(temperatures.first)));
     for (int i = 1; i < temperatures.length - 1; i++) {
-      spots.add(FlSpot(
-          i + 0.5, (temperatures[i] - smallestTemperature).toDouble() * 0.5));
+      spots.add(FlSpot(i + 0.5, computeYValue(temperatures[i])));
     }
     spots.add(FlSpot(temperatures.length.toDouble() - 0.5,
-        (temperatures.last - smallestTemperature).toDouble() * 0.5));
-    spots.add(FlSpot(temperatures.length.toDouble(),
-        (temperatures.last - smallestTemperature).toDouble() * 0.5));
+        computeYValue(temperatures.last)));
+    spots.add(FlSpot(
+        temperatures.length.toDouble(), computeYValue(temperatures.last)));
+    return spots;
+  }
 
+  LineChartData mainData() {
     return LineChartData(
       gridData: const FlGridData(
         show: false,
@@ -136,7 +147,8 @@ class _LineChartWidgetState extends State<LineChartWidget> {
       maxY: 4,
       lineBarsData: [
         LineChartBarData(
-          spots: spots,
+          spots: generateFlSpots(
+              temperatures, smallestTemperature, temperatureDifference),
           isCurved: true,
           gradient: LinearGradient(
             colors: gradientColors,
