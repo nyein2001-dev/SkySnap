@@ -643,11 +643,15 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
                           ),
                           child: Padding(
                             padding: const EdgeInsets.only(
-                                top: 18, bottom: 18, left: 5),
+                                top: 18, bottom: 18, left: 22, right: 5),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                WindDirectionCircle(
+                                  direction: weather.windDirection,
+                                  weather: weather,
+                                ),
                                 Column(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -656,13 +660,6 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
                                     Text(
                                         "${weather.windSpeedKmh.toStringAsFixed(2)} km/h")
                                   ],
-                                ),
-                                const SizedBox(
-                                  width: 18,
-                                ),
-                                WindDirectionCircle(
-                                  direction: weather.windDirection,
-                                  weather: weather,
                                 ),
                               ],
                             ),
