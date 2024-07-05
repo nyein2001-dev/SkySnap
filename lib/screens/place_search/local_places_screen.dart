@@ -54,6 +54,7 @@ class _PlaceAutoCompleteTextFieldState
   OverlayEntry? _overlayEntry;
   bool isSearched = false;
   bool isCrossBtn = true;
+  bool isLoading = false;
   late Dio _dio;
 
   @override
@@ -125,9 +126,14 @@ class _PlaceAutoCompleteTextFieldState
   getLocation(String text) async {
     if (text.isEmpty) {
       filteredCities.clear();
-      _overlayEntry!.remove();
+      _overlayEntry?.remove();
       return;
     }
+
+    setState(() {
+      isLoading = true;
+    });
+
     String url =
         "http://api.openweathermap.org/geo/1.0/direct?q=$text&limit=5&APPID=${widget.openWeatherAPIKey}";
 
@@ -145,7 +151,7 @@ class _PlaceAutoCompleteTextFieldState
 
       if (text.isEmpty) {
         filteredCities.clear();
-        _overlayEntry!.remove();
+        _overlayEntry?.remove();
         return;
       }
 
@@ -156,12 +162,20 @@ class _PlaceAutoCompleteTextFieldState
         filteredCities.addAll(cityList);
       }
 
+      setState(() {
+        isLoading = false;
+      });
+
       _overlayEntry = null;
       _overlayEntry = _createOverlayEntry();
       Overlay.of(context).insert(_overlayEntry!);
     } catch (e) {
       var errorHandler = ErrorHandler.internal().handleError(e);
       _showSnackBar("${errorHandler.message}");
+
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -195,30 +209,60 @@ class _PlaceAutoCompleteTextFieldState
                   offset: Offset(0.0, size.height + 5.0),
                   child: Material(
                       color: Colors.transparent,
-                      child: ListView.separated(
-                        padding: EdgeInsets.zero,
-                        shrinkWrap: true,
-                        itemCount: filteredCities.length,
-                        separatorBuilder: (context, pos) =>
-                            widget.seperatedBuilder ?? const SizedBox(),
-                        itemBuilder: (BuildContext context, int index) {
-                          return InkWell(
-                            onTap: () {
-                              var selectedData = filteredCities[index];
-                              if (index < filteredCities.length) {
-                                widget.itemClick!(selectedData);
-                                removeOverlay();
-                              }
-                            },
-                            child: widget.itemBuilder != null
-                                ? widget.itemBuilder!(
-                                    context, index, filteredCities[index])
-                                : Container(
-                                    padding: const EdgeInsets.all(10),
-                                    child: Text(filteredCities[index].name)),
-                          );
-                        },
-                      )),
+                      child: isLoading
+                          ? Padding(
+                              padding: EdgeInsets.only(
+                                  top: MediaQuery.of(context).size.height / 10),
+                              child: const Center(
+                                  child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  CircularProgressIndicator(
+                                    strokeWidth: 1.5,
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text("Searching ... ")
+                                ],
+                              )))
+                          : filteredCities.isEmpty
+                              ? Padding(
+                                  padding: EdgeInsets.only(
+                                      top: MediaQuery.of(context).size.height /
+                                          10),
+                                  child: const Center(
+                                      child: Text('No results found')),
+                                )
+                              : ListView.separated(
+                                  padding: EdgeInsets.zero,
+                                  shrinkWrap: true,
+                                  itemCount: filteredCities.length,
+                                  separatorBuilder: (context, pos) =>
+                                      widget.seperatedBuilder ??
+                                      const SizedBox(),
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return InkWell(
+                                      onTap: () {
+                                        var selectedData =
+                                            filteredCities[index];
+                                        if (index < filteredCities.length) {
+                                          widget.itemClick!(selectedData);
+                                          removeOverlay();
+                                        }
+                                      },
+                                      child: widget.itemBuilder != null
+                                          ? widget.itemBuilder!(context, index,
+                                              filteredCities[index])
+                                          : Container(
+                                              padding: const EdgeInsets.all(10),
+                                              child: Text(
+                                                  filteredCities[index].name)),
+                                    );
+                                  },
+                                )),
                 ),
               ));
     }
@@ -260,7 +304,11 @@ class _PlaceAutoCompleteTextFieldState
   _showSnackBar(String errorData) {
     if (widget.showError && mounted) {
       final snackBar = SnackBar(
-        content: Text(errorData),
+        backgroundColor: Colors.grey,
+        content: Text(
+          errorData,
+          style: TextStyle(color: Colors.grey[200]),
+        ),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
