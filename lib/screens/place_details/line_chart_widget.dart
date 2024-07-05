@@ -1,9 +1,12 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:sky_snap/api/models/hourly_weather.dart';
 import 'package:sky_snap/utils/weather_icon.dart';
 
 class LineChartWidget extends StatefulWidget {
-  const LineChartWidget({super.key});
+  final List<WeatherData> weatherDataList;
+  const LineChartWidget({super.key, required this.weatherDataList});
 
   @override
   State<LineChartWidget> createState() => _LineChartWidgetState();
@@ -15,27 +18,30 @@ class _LineChartWidgetState extends State<LineChartWidget> {
     Colors.yellow,
   ];
 
-  final List<double> temperatures = [22, 23, 24, 22, 21, 25, 26, 23];
-  final List<String> windSpeeds = [
-    '7.4km/h',
-    '8.0km/h',
-    '7.2km/h',
-    '6.9km/h',
-    '7.1km/h',
-    '8.5km/h',
-    '7.6km/h',
-    '7.4km/h'
-  ];
-  final List<String> times = [
-    '19:00',
-    '20:00',
-    '21:00',
-    '22:00',
-    '23:00',
-    '00:00',
-    '01:00',
-    '02:00'
-  ];
+  final List<int> temperatures = [];
+  final List<String> windSpeeds = [];
+  final List<String> times = [];
+  final List<String> iconCode = [];
+  int smallestTemperature = 100;
+
+  @override
+  void initState() {
+    for (var data in widget.weatherDataList) {
+      temperatures.add(data.temp.toInt());
+      windSpeeds.add("${data.windSpeedKmh.toStringAsFixed(2)} km/h");
+      times.add(_formatTimestamp(data.dt));
+      iconCode.add(data.icon);
+    }
+    smallestTemperature =
+        temperatures.reduce((current, next) => current < next ? current : next);
+    super.initState();
+  }
+
+  static String _formatTimestamp(int timestamp) {
+    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+    String formattedTime = DateFormat.Hm().format(dateTime);
+    return formattedTime;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +78,7 @@ class _LineChartWidgetState extends State<LineChartWidget> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(temperatures.length, (index) {
                   return WeatherInfo(
-                    iconCode: '10d',
+                    iconCode: iconCode[index],
                     windSpeed: windSpeeds[index],
                     time: times[index],
                   );
@@ -88,14 +94,19 @@ class _LineChartWidgetState extends State<LineChartWidget> {
   LineChartData mainData() {
     List<FlSpot> spots = [];
     spots.clear();
-    spots.add(const FlSpot(0, 2)); // First spot
-    spots.add(const FlSpot(0.5, 3)); // Second spot
+    spots.add(
+        FlSpot(0, (temperatures.first - smallestTemperature).toDouble() * 0.5));
+    spots.add(FlSpot(
+        0.5, (temperatures.first - smallestTemperature).toDouble() * 0.5));
 
     for (int i = 1; i < temperatures.length - 1; i++) {
-      spots.add(FlSpot(i + 0.5, temperatures[i] - 21));
+      spots.add(FlSpot(
+          i + 0.5, (temperatures[i] - smallestTemperature).toDouble() * 0.5));
     }
     spots.add(FlSpot(temperatures.length.toDouble() - 0.5,
-        temperatures.last - 20)); // Last spot
+        (temperatures.last - smallestTemperature).toDouble() * 0.5));
+    spots.add(FlSpot(temperatures.length.toDouble(),
+        (temperatures.last - smallestTemperature).toDouble() * 0.5));
 
     return LineChartData(
       gridData: const FlGridData(
@@ -130,7 +141,7 @@ class _LineChartWidgetState extends State<LineChartWidget> {
           gradient: LinearGradient(
             colors: gradientColors,
           ),
-          barWidth: 5,
+          barWidth: 1.2,
           isStrokeCapRound: true,
           dotData: const FlDotData(
             show: true,
@@ -150,7 +161,7 @@ class _LineChartWidgetState extends State<LineChartWidget> {
 }
 
 class TemperatureDisplay extends StatelessWidget {
-  final double temp;
+  final int temp;
 
   const TemperatureDisplay({super.key, required this.temp});
 
@@ -199,9 +210,7 @@ class WeatherInfo extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(
-          getWeatherIcon(iconCode),
-        ),
+        WeatherIconWidget(code: iconCode),
         Text(windSpeed),
         Text(time),
       ],

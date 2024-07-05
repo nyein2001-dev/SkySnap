@@ -1,11 +1,18 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:page_view_dot_indicator/page_view_dot_indicator.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:sky_snap/api/models/hourly_weather.dart';
+import 'package:sky_snap/api/models/weather.dart';
 import 'package:sky_snap/screens/home/main_screen.dart';
 import 'package:sky_snap/screens/place_details/line_chart_widget.dart';
 import 'package:sky_snap/screens/place_details/weekly_details_screen.dart';
 import 'package:sky_snap/utils/colors.dart';
 import 'package:sky_snap/utils/navigation.dart';
+import 'package:sky_snap/utils/strings.dart';
 import 'package:sky_snap/utils/weather_icon.dart';
+import 'dart:math' as math;
 
 class WeatherDetailsScreen extends StatefulWidget {
   const WeatherDetailsScreen({super.key});
@@ -18,55 +25,55 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
   late int selectedPage;
   late final PageController _pageController;
 
-  // late Weather weather;
-  // late Dio _dio;
-  // bool loading = true;
+  late Weather weather;
+  late WeatherResponse weatherResponse;
+  late Dio _dio;
+  bool loading = true;
+  double uv = 0;
 
   @override
   void initState() {
     selectedPage = 0;
+    _dio = Dio();
     _pageController = PageController(initialPage: selectedPage);
+    getForecast();
     super.initState();
   }
 
-  // void getForecast() async {
-  //   // String url =
-  //   //     "http://api.openweathermap.org/geo/1.0/direct?q=Yangon,mm&limit=5&APPID=$openWeatherAPIKey";
+  void getForecast() async {
+    String url =
+        "https://api.openweathermap.org/data/2.5/weather?q=Bangkok,th&APPID=$openWeatherAPIKey";
 
-  //   String url =
-  //       "https://api.openweathermap.org/data/2.5/weather?q=Yangon,mm&APPID=$openWeatherAPIKey";
+    String hourlyWeatherUrl =
+        "https://api.openweathermap.org/data/2.5/forecast?q=Bangkok,th&appid=$openWeatherAPIKey";
 
-  //   Response response = await _dio.get(url);
-  //   if (response.statusCode == 200) {
-  //     setState(() {
-  //       weather = Weather.fromJson(response.data);
-  //       loading = false;
-  //     });
-  //   } else {
-  //     throw Exception('Failed to load weather data');
-  //   }
-  // }
+    Response response = await _dio.get(url);
+    if (response.statusCode == 200) {
+      setState(() {
+        weather = Weather.fromJson(response.data);
+      });
+    } else {
+      throw Exception('Failed to load weather data');
+    }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  // }
+    String uvUrl =
+        "https://api.openweathermap.org/data/2.5/uvi?lat=${weather.lat}&lon=${weather.lon}&appid=$openWeatherAPIKey";
 
-  // void getWeatherData() {
-  //       String url =
-  //       "http://api.openweathermap.org/geo/1.0/direct?q=$text&limit=5&APPID=${widget.openWeatherAPIKey}";
+    Response uvResponse = await _dio.get(uvUrl);
+    if (uvResponse.statusCode == 200) {
+      uv = uvResponse.data['value'];
+    }
 
-  //   try {
-  //     Response response = await _dio.get(url);
-  //     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-  //     List<dynamic> data = response.data as List<dynamic>;
-  //     List<City> cityList = data.map((json) => City.fromJson(json)).toList();
-  //         } catch (e) {
-  //     var errorHandler = ErrorHandler.internal().handleError(e);
-  //     _showSnackBar("${errorHandler.message}");
-  //   }
-  // }
+    Response hourlyWeatherResponse = await _dio.get(hourlyWeatherUrl);
+    if (hourlyWeatherResponse.statusCode == 200) {
+      setState(() {
+        weatherResponse = WeatherResponse.fromJson(hourlyWeatherResponse.data);
+        loading = false;
+      });
+    } else {
+      throw Exception('Failed to load weather data');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -113,9 +120,9 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: const Text(
-        "Yangon",
-        style: TextStyle(color: Colors.white),
+      title: Text(
+        loading ? '' : weather.name,
+        style: const TextStyle(color: Colors.white),
       ),
       leading: IconButton(
         onPressed: () {
@@ -137,7 +144,7 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
         currentItem: selectedPage,
         count: pageCount,
         unselectedColor: Colors.black26,
-        selectedColor: Colors.blue,
+        selectedColor: Colors.amber,
         duration: const Duration(milliseconds: 200),
         size: const Size(5, 5),
         boxShape: BoxShape.circle,
@@ -174,17 +181,34 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Column(
             children: [
-              SizedBox(
-                height: MediaQuery.of(context).size.height / 2,
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    _TemperatureDisplay(),
-                    SizedBox(height: 25),
-                  ],
-                ),
-              ),
+              loading
+                  ? Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Container(
+                        width: MediaQuery.of(context).size.height / 2,
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(15.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.blue.withOpacity(0.5),
+                            ),
+                          ],
+                        ),
+                      ))
+                  : SizedBox(
+                      height: MediaQuery.of(context).size.height / 2,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          _TemperatureDisplay(
+                            weather: weather,
+                          ),
+                        ],
+                      ),
+                    ),
               const SizedBox(height: 10),
               _buildForecastContainer(context),
               const SizedBox(height: 10),
@@ -219,7 +243,21 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
     );
   }
 
+  List<WeatherData> filterDataForDate(DateTime targetDate) {
+    return weatherResponse.list.where((weather) {
+      DateTime dateTime =
+          DateTime.fromMillisecondsSinceEpoch(weather.dt * 1000);
+      return dateTime.year == targetDate.year &&
+          dateTime.month == targetDate.month &&
+          dateTime.day == targetDate.day;
+    }).toList();
+  }
+
   Widget _buildForecastContainer(BuildContext context) {
+    DateTime today = DateTime.now();
+    List<DateTime> targetDates =
+        List.generate(5, (index) => today.add(Duration(days: index)));
+
     return SizedBox(
       height: MediaQuery.of(context).size.height / 2.75,
       child: Container(
@@ -239,16 +277,39 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               _buildForecastHeader(context),
-              _buildForecastRow('Today', 'scattered clouds', '32/26', '03d'),
-              _buildForecastRow('Today', 'scattered clouds', '32/26', '03d'),
-              _buildForecastRow('Today', 'scattered clouds', '32/26', '03d'),
-              _buildForecastRow('Today', 'scattered clouds', '32/26', '03d'),
-              _buildForecastRow('Today', 'scattered clouds', '32/26', '03d'),
+              if (loading)
+                const Expanded(child: ShimmerLoadingWidget())
+              else
+                for (DateTime date in targetDates) ...[
+                  _buildForecastRow(
+                      formatDate(date),
+                      toTitleCase(filterDataForDate(date).first.description),
+                      '${filterDataForDate(date).first.tempMin.toInt()}/${filterDataForDate(date).first.tempMax.toInt()}',
+                      filterDataForDate(date).first.icon),
+                ]
             ],
           ),
         ),
       ),
     );
+  }
+
+  String formatDate(DateTime date) {
+    DateTime now = DateTime.now();
+    DateTime tomorrow = now.add(const Duration(days: 1));
+    intl.DateFormat dayFormat = intl.DateFormat('EEEE');
+
+    if (date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day) {
+      return 'Today';
+    } else if (date.year == tomorrow.year &&
+        date.month == tomorrow.month &&
+        date.day == tomorrow.day) {
+      return 'Tomorrow';
+    } else {
+      return dayFormat.format(date);
+    }
   }
 
   Widget _buildForecastHeader(BuildContext context) {
@@ -294,7 +355,11 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
             ],
           ),
           onTap: () {
-            startScreen(context, const WeeklyDetailsScreen());
+            startScreen(
+                context,
+                WeeklyDetailsScreen(
+                  weatherResponse: weatherResponse,
+                ));
           },
         ),
       ],
@@ -308,7 +373,7 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
       children: [
         Row(
           children: [
-            Icon(getWeatherIcon(icon)),
+            WeatherIconWidget(code: icon),
             const SizedBox(width: 5),
             Text(
               day,
@@ -341,13 +406,13 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
             ),
           ],
         ),
-        child: const Padding(
-          padding: EdgeInsets.all(10),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(
+              const Row(
                 children: [
                   Icon(
                     Icons.access_time_filled_outlined,
@@ -361,7 +426,11 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
                   ),
                 ],
               ),
-              LineChartWidget(),
+              loading
+                  ? Container()
+                  : LineChartWidget(
+                      weatherDataList: filterDataForDate(DateTime.now()),
+                    ),
             ],
           ),
         ),
@@ -382,130 +451,197 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
-                  child: Container(
-                    width: MediaQuery.of(context).size.width / 2.2,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(15.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.blue.withOpacity(0.5),
-                        ),
-                      ],
-                    ),
-                    child: const Padding(
-                      padding: EdgeInsets.only(top: 20, bottom: 20),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Wind"),
-                          Text("5.6km/h"),
-                        ],
-                      ),
-                    ),
-                  ),
+                  child: loading
+                      ? Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Container(
+                            width: MediaQuery.of(context).size.width / 2.2,
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(15.0),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.blue.withOpacity(0.5),
+                                ),
+                              ],
+                            ),
+                          ))
+                      : Container(
+                          width: MediaQuery.of(context).size.width / 2.2,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(15.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.blue.withOpacity(0.5),
+                              ),
+                            ],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                top: 18, bottom: 18, left: 5),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(weather.windDirection),
+                                    Text(
+                                        "${weather.windSpeedKmh.toStringAsFixed(2)} km/h")
+                                  ],
+                                ),
+                                const SizedBox(
+                                  width: 18,
+                                ),
+                                WindDirectionCircle(
+                                  direction: weather.windDirection,
+                                  weather: weather,
+                                ),
+                              ],
+                            ),
+                          )),
                 ),
                 const SizedBox(height: 10),
                 Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(15.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.blue.withOpacity(0.5),
+                  child: loading
+                      ? Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(15.0),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.blue.withOpacity(0.5),
+                                ),
+                              ],
+                            ),
+                          ))
+                      : Container(
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(15.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.blue.withOpacity(0.5),
+                              ),
+                            ],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text("Sunrise"),
+                                    Text(weather.sunrise),
+                                  ],
+                                ),
+                                const Divider(
+                                    color: Colors.white, thickness: 0.2),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text("Sunset"),
+                                    Text(weather.sunset),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ],
-                    ),
-                    child: const Padding(
-                      padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Sunrise"),
-                              Text("57%"),
-                            ],
-                          ),
-                          Divider(color: Colors.white, thickness: 0.2),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Sunset"),
-                              Text("57%"),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 ),
               ],
             ),
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(15.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.blue.withOpacity(0.5),
+            child: loading
+                ? Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(15.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.5),
+                          ),
+                        ],
+                      ),
+                    ))
+                : Container(
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(15.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.5),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("Humidity"),
+                              Text("${weather.humidity}%"),
+                            ],
+                          ),
+                          const Divider(color: Colors.white, thickness: 0.2),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("Real feel"),
+                              Text(
+                                "${weather.feelsLike.toInt()}\u00b0",
+                              ),
+                            ],
+                          ),
+                          const Divider(color: Colors.white, thickness: 0.2),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("UV"),
+                              Text("$uv"),
+                            ],
+                          ),
+                          const Divider(color: Colors.white, thickness: 0.2),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("Pressure"),
+                              Text("${weather.pressure}mbar"),
+                            ],
+                          ),
+                          const Divider(color: Colors.white, thickness: 0.2),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("Chance of rain"),
+                              Text(
+                                  "${weather.chanceOfRain.toStringAsFixed(0)}%"),
+                            ],
+                          ),
+                          const Divider(color: Colors.white, thickness: 0.2),
+                        ],
+                      ),
+                    ),
                   ),
-                ],
-              ),
-              child: const Padding(
-                padding: EdgeInsets.all(10),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Humidity"),
-                        Text("57%"),
-                      ],
-                    ),
-                    Divider(color: Colors.white, thickness: 0.2),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Real feel"),
-                        Text("57%"),
-                      ],
-                    ),
-                    Divider(color: Colors.white, thickness: 0.2),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("UV"),
-                        Text("57%"),
-                      ],
-                    ),
-                    Divider(color: Colors.white, thickness: 0.2),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Pressure"),
-                        Text("57%"),
-                      ],
-                    ),
-                    Divider(color: Colors.white, thickness: 0.2),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Chance of rain"),
-                        Text("57%"),
-                      ],
-                    ),
-                    Divider(color: Colors.white, thickness: 0.2),
-                  ],
-                ),
-              ),
-            ),
           ),
         ],
       ),
@@ -513,24 +649,164 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
   }
 }
 
-class _TemperatureDisplay extends StatelessWidget {
-  const _TemperatureDisplay();
+class WindDirectionCircle extends StatelessWidget {
+  final String direction;
+  final Weather weather;
+
+  const WindDirectionCircle(
+      {super.key, required this.direction, required this.weather});
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return CustomPaint(
+      painter: WindDirectionPainter(direction, weather),
+    );
+  }
+}
+
+class WindDirectionPainter extends CustomPainter {
+  final String direction;
+  final Weather weather;
+
+  WindDirectionPainter(this.direction, this.weather);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const double radius = 150 / 5;
+    const Offset center = Offset(150 / 5, 150 / 5);
+
+    Paint circlePaint = Paint()
+      ..color = Colors.grey[300]!
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+    canvas.drawCircle(center, radius, circlePaint);
+
+    TextPainter textPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+    );
+
+    const double textPadding = 20;
+
+    textPainter.text =
+        const TextSpan(text: 'N', style: TextStyle(fontSize: 16));
+    textPainter.layout();
+    Offset northOffset = Offset(
+        center.dx - textPainter.width / 2, center.dy - radius - textPadding);
+    textPainter.paint(canvas, northOffset);
+
+    textPainter.text =
+        const TextSpan(text: 'S', style: TextStyle(fontSize: 16));
+    textPainter.layout();
+    Offset southOffset = Offset(center.dx - textPainter.width / 2,
+        center.dy + radius + textPadding - textPainter.height);
+    textPainter.paint(canvas, southOffset);
+
+    textPainter.text =
+        const TextSpan(text: 'W', style: TextStyle(fontSize: 16));
+    textPainter.layout();
+    Offset westOffset = Offset(center.dx - radius - 5 - textPainter.width,
+        center.dy - textPainter.height / 2);
+    textPainter.paint(canvas, westOffset);
+
+    textPainter.text =
+        const TextSpan(text: 'E', style: TextStyle(fontSize: 16));
+    textPainter.layout();
+    Offset eastOffset =
+        Offset(center.dx + radius + 5, center.dy - textPainter.height / 2);
+    textPainter.paint(canvas, eastOffset);
+
+    double angle = weather.windDeg.toDouble();
+    double arrowLength = radius - textPadding;
+
+    Offset arrowStart = Offset(
+      center.dx + arrowLength * math.cos(angle),
+      center.dy + arrowLength * math.sin(angle),
+    );
+
+    Paint arrowPaint = Paint()..color = Colors.amber;
+    canvas.drawLine(center, arrowStart, arrowPaint);
+
+    Path path = Path();
+    path.moveTo(arrowStart.dx, arrowStart.dy);
+    path.lineTo(
+      arrowStart.dx + 10 * math.cos(angle - math.pi / 6),
+      arrowStart.dy + 10 * math.sin(angle - math.pi / 6),
+    );
+    path.lineTo(
+      arrowStart.dx + 10 * math.cos(angle + math.pi / 6),
+      arrowStart.dy + 10 * math.sin(angle + math.pi / 6),
+    );
+    path.close();
+    canvas.drawPath(path, arrowPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
+  }
+}
+
+class ShimmerLoadingWidget extends StatelessWidget {
+  const ShimmerLoadingWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 10),
+          _shimmerBox(context, height: 32),
+          const SizedBox(height: 5),
+          _shimmerBox(context, height: 32),
+          const SizedBox(height: 5),
+          _shimmerBox(context, height: 32),
+          const SizedBox(height: 5),
+          _shimmerBox(context, height: 32),
+          const SizedBox(height: 5),
+          _shimmerBox(context, height: 32),
+        ],
+      ),
+    );
+  }
+
+  Widget _shimmerBox(BuildContext context,
+      {double? width, required double height}) {
+    return Container(
+      width: width ?? MediaQuery.of(context).size.width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+      ),
+    );
+  }
+}
+
+class _TemperatureDisplay extends StatelessWidget {
+  final Weather weather;
+  const _TemperatureDisplay({required this.weather});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
       children: [
         Text(
-          "27\u00b0",
-          style: TextStyle(
+          "${weather.temp.toInt()}\u00b0",
+          style: const TextStyle(
             fontSize: 100,
-            fontWeight: FontWeight.w100,
+            fontWeight: FontWeight.w400,
             color: Colors.white,
           ),
         ),
         Text(
-          "Monday, 13:00 PM",
-          style: TextStyle(color: Colors.white),
+          "${toTitleCase(weather.description)}   ${weather.tempMin.toInt()} / ${weather.tempMax.toInt()}",
+          style: const TextStyle(
+              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
         ),
       ],
     );
