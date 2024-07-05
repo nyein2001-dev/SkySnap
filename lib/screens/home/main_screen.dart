@@ -107,7 +107,9 @@ class _MyHomePageState extends State<MyHomePage> {
               WeatherDetailsScreen(
                 city: suggestion,
                 fromMain: false,
-              ));
+              )).then((v) {
+            setState(() {});
+          });
         },
         seperatedBuilder: const Divider(
           color: Colors.transparent,
@@ -228,7 +230,8 @@ class PopularCityGroup extends StatelessWidget {
       children: cities.map((city) {
         return ElevatedButton(
           onPressed: () {
-            startScreen(context, WeatherDetailsScreen(city: city, fromMain: false));
+            startScreen(
+                context, WeatherDetailsScreen(city: city, fromMain: false));
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.grey[200],

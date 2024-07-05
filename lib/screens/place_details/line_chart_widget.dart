@@ -222,7 +222,7 @@ class WeatherInfo extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        WeatherIconWidget(code: iconCode),
+        WeatherIconWidget(code: iconCode, size: 20.0,),
         Text(windSpeed),
         Text(time),
       ],

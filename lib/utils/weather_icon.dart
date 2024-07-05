@@ -24,15 +24,16 @@ Map<String, IconData> weatherIconMapping = {
 
 class WeatherIconWidget extends StatelessWidget {
   final String code;
+  final double size;
 
-  const WeatherIconWidget({super.key, required this.code});
+  const WeatherIconWidget({super.key, required this.code, required this.size});
 
   @override
   Widget build(BuildContext context) {
     IconData? iconData = weatherIconMapping[code];
 
     return iconData != null
-        ? BoxedIcon(iconData, size: 20.0)
-        : const BoxedIcon(WeatherIcons.na, size: 20.0);
+        ? BoxedIcon(iconData, size: size)
+        : BoxedIcon(WeatherIcons.na, size: size);
   }
 }

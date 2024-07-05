@@ -2,6 +2,7 @@ import 'package:intl/intl.dart';
 
 class Weather {
   final String name;
+  final String country;
   final double temp;
   final double feelsLike;
   final double tempMin;
@@ -19,9 +20,11 @@ class Weather {
   final double chanceOfRain;
   final double lat;
   final double lon;
+  double? uv;
 
   Weather(
       {required this.name,
+      required this.country,
       required this.temp,
       required this.feelsLike,
       required this.tempMin,
@@ -38,11 +41,13 @@ class Weather {
       required this.sunset,
       required this.chanceOfRain,
       required this.lat,
-      required this.lon});
+      required this.lon,
+      required this.uv});
 
   Map<String, dynamic> toSharedJson() {
     return {
       'name': name,
+      'country': country,
       'temp': temp,
       'feelsLike': feelsLike,
       'tempMin': tempMin,
@@ -60,30 +65,32 @@ class Weather {
       'chanceOfRain': chanceOfRain,
       'lat': lat,
       'lon': lon,
+      'uv': uv ?? 0.0,
     };
   }
 
   factory Weather.fromSharedJson(Map<String, dynamic> json) {
     return Weather(
-      name: json['name'],
-      temp: json['temp'],
-      feelsLike: json['feelsLike'],
-      tempMin: json['tempMin'],
-      tempMax: json['tempMax'],
-      pressure: json['pressure'],
-      humidity: json['humidity'],
-      visibility: json['visibility'],
-      windSpeedKmh: json['windSpeedKmh'],
-      windDeg: json['windDeg'],
-      description: json['description'],
-      iconCode: json['iconCode'],
-      windDirection: json['windDirection'],
-      sunrise: json['sunrise'],
-      sunset: json['sunset'],
-      chanceOfRain: json['chanceOfRain'],
-      lat: json['lat'],
-      lon: json['lon'],
-    );
+        name: json['name'],
+        country: json['country'],
+        temp: json['temp'],
+        feelsLike: json['feelsLike'],
+        tempMin: json['tempMin'],
+        tempMax: json['tempMax'],
+        pressure: json['pressure'],
+        humidity: json['humidity'],
+        visibility: json['visibility'],
+        windSpeedKmh: json['windSpeedKmh'],
+        windDeg: json['windDeg'],
+        description: json['description'],
+        iconCode: json['iconCode'],
+        windDirection: json['windDirection'],
+        sunrise: json['sunrise'],
+        sunset: json['sunset'],
+        chanceOfRain: json['chanceOfRain'],
+        lat: json['lat'],
+        lon: json['lon'],
+        uv: json['uv'] ?? 0.0);
   }
 
   factory Weather.fromJson(Map<String, dynamic> json) {
@@ -91,6 +98,7 @@ class Weather {
     double windSpeedKmh = windSpeedMps * 3.6;
     return Weather(
         name: json['name'],
+        country: json['sys']['country'],
         temp: json['main']['temp'].toDouble() - 273.15,
         feelsLike: json['main']['feels_like'].toDouble() - 273.15,
         tempMin: json['main']['temp_min'].toDouble() - 273.15,
@@ -107,6 +115,7 @@ class Weather {
         sunset: _formatTimestamp(json['sys']['sunset']),
         lat: json['coord']['lat'],
         lon: json['coord']['lon'],
+        uv: json['uv'] ?? 0.0,
         chanceOfRain: _calculateChanceOfRain(json));
   }
 

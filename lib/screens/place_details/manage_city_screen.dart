@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:sky_snap/api/models/city.dart';
+import 'package:sky_snap/api/models/weather.dart';
 import 'package:sky_snap/screens/home/main_screen.dart';
+import 'package:sky_snap/screens/place_details/weather_details_screen.dart';
 import 'package:sky_snap/utils/colors.dart';
-import 'package:weather_icons/weather_icons.dart';
+import 'package:sky_snap/utils/database_helper.dart';
+import 'package:sky_snap/utils/navigation.dart';
+import 'package:sky_snap/utils/weather_icon.dart';
 
 class ManageCityScreen extends StatefulWidget {
   const ManageCityScreen({super.key});
@@ -11,6 +16,18 @@ class ManageCityScreen extends StatefulWidget {
 }
 
 class _ManageCityScreenState extends State<ManageCityScreen> {
+  List<Weather> weatherList = [];
+  @override
+  void initState() {
+    init();
+    super.initState();
+  }
+
+  void init() async {
+    weatherList = await DatabaseHelper().getWeathers();
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -77,70 +94,82 @@ class _ManageCityScreenState extends State<ManageCityScreen> {
                       ),
                     ),
                   ),
-                  Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      child: Container(
-                        height: MediaQuery.of(context).size.height / 8,
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(15.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.blue.withOpacity(0.5),
+                  for (Weather data in weatherList) ...[
+                    InkWell(
+                      onTap: () {
+                        startScreen(
+                            context,
+                            WeatherDetailsScreen(
+                                city: City(
+                                    name: data.name,
+                                    lat: data.lat,
+                                    lon: data.lon,
+                                    country: data.country,
+                                    state: ''),
+                                fromMain: false));
+                      },
+                      child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
+                          child: Container(
+                            height: MediaQuery.of(context).size.height / 8,
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(15.0),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.blue.withOpacity(0.5),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 15),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 15),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  BoxedIcon(WeatherIcons.cloudy, size: 40.0),
-                                  Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                        CrossAxisAlignment.center,
                                     children: [
-                                      Text(
-                                        "Bangkok",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold),
+                                      WeatherIconWidget(
+                                        code: data.iconCode,
+                                        size: 40.0,
                                       ),
-                                      Text("Cloudy 23/25")
+                                      const SizedBox(
+                                        width: 10,
+                                      ),
+                                      Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            data.name,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          Text(
+                                              "${toTitleCase(data.description)} ${data.tempMin.toInt()}/${data.tempMax.toInt()}")
+                                        ],
+                                      )
                                     ],
+                                  ),
+                                  Text(
+                                    "${data.temp.toInt()}\u00b0",
+                                    style: const TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold),
                                   )
                                 ],
                               ),
-                              Text(
-                                "27\u00b0",
-                                style: TextStyle(
-                                    fontSize: 22, fontWeight: FontWeight.bold),
-                              )
-                            ],
-                          ),
-                        ),
-                      )),
-                  Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      child: Container(
-                          height: MediaQuery.of(context).size.height / 8,
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(15.0),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.blue.withOpacity(0.5),
-                              ),
-                            ],
-                          ))),
+                            ),
+                          )),
+                    ),
+                  ]
                 ],
               )))
         ]));

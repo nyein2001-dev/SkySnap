@@ -12,6 +12,7 @@ import 'package:sky_snap/screens/place_details/manage_city_screen.dart';
 import 'package:sky_snap/screens/place_details/weekly_details_screen.dart';
 import 'package:sky_snap/utils/colors.dart';
 import 'package:sky_snap/utils/database_helper.dart';
+import 'package:sky_snap/utils/dio_error_handler.dart';
 import 'package:sky_snap/utils/navigation.dart';
 import 'package:sky_snap/utils/strings.dart';
 import 'package:sky_snap/utils/weather_icon.dart';
@@ -31,18 +32,16 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
   late int selectedPage;
   late final PageController _pageController;
 
-  late Weather weather;
-  late WeatherResponse weatherResponse;
+  List<Weather> weatherList = [];
+  List<WeatherResponse> weatherResponseList = [];
   late Dio _dio;
   bool loading = true;
-  double uv = 0;
   City city = City(
       name: "Mumbai",
       lat: 19.0144,
       lon: 72.8479,
       country: "IN",
       state: "Maharashtra");
-  List<Weather> weatherList = [];
 
   late EasyRefreshController _controller;
   bool showAddCartButton = false;
@@ -50,11 +49,7 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    city = widget.city;
-    if (!widget.fromMain) {
-      showAddCartButton = weatherList.isEmpty ||
-          !weatherList.any((data) => data.name == city.name);
-    }
+    initWeatherData();
     _controller = EasyRefreshController(
       controlFinishRefresh: true,
       controlFinishLoad: true,
@@ -62,49 +57,103 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
     selectedPage = 0;
     _dio = Dio();
     _pageController = PageController(initialPage: selectedPage);
+    _pageController.addListener(() {
+      city = City(
+          name: weatherList[_pageController.page!.toInt()].name,
+          lat: weatherList[_pageController.page!.toInt()].lat,
+          lon: weatherList[_pageController.page!.toInt()].lon,
+          country: weatherList[_pageController.page!.toInt()].country,
+          state: '');
+      setState(() {});
+      getForecast();
+    });
     getForecast();
     super.initState();
   }
 
+  void initWeatherData() async {
+    city = widget.city;
+    if (widget.fromMain) {
+      weatherList = await DatabaseHelper().getWeathers();
+      weatherResponseList = await DatabaseHelper().getWeatherResponseList();
+      loading = false;
+    } else {
+      loading = true;
+      DatabaseHelper().getWeathers().then((value) {
+        showAddCartButton =
+            value.isEmpty || !value.any((data) => data.name == city.name);
+        return value;
+      });
+    }
+    setState(() {});
+  }
+
   void getForecast() async {
-    weatherList = await DatabaseHelper().getWeathers();
-    String url =
-        "https://api.openweathermap.org/data/2.5/weather?q=${city.name},${city.country}&APPID=$openWeatherAPIKey";
+    try {
+      late Weather weather;
+      String url =
+          "https://api.openweathermap.org/data/2.5/weather?q=${city.name},${city.country}&APPID=$openWeatherAPIKey";
 
-    String hourlyWeatherUrl =
-        "https://api.openweathermap.org/data/2.5/forecast?q=${city.name},${city.country}&appid=$openWeatherAPIKey";
+      String hourlyWeatherUrl =
+          "https://api.openweathermap.org/data/2.5/forecast?q=${city.name},${city.country}&appid=$openWeatherAPIKey";
 
-    Response response = await _dio.get(url);
-    if (response.statusCode == 200) {
-      setState(() {
-        weather = Weather.fromJson(response.data);
-      });
-    } else {
-      throw Exception('Failed to load weather data');
+      Response response = await _dio.get(url);
+      if (response.statusCode == 200) {
+        setState(() {
+          weather = Weather.fromJson(response.data);
+        });
+      } else {
+        throw Exception('Failed to load weather data');
+      }
+
+      String uvUrl =
+          "https://api.openweathermap.org/data/2.5/uvi?lat=${city.lat}&lon=${city.lon}&appid=$openWeatherAPIKey";
+
+      Response uvResponse = await _dio.get(uvUrl);
+      if (uvResponse.statusCode == 200) {
+        double uv = uvResponse.data['value'];
+        weather.uv = uv;
+      }
+      if (widget.fromMain) {
+        await DatabaseHelper().updateWeather(weather);
+      }
+
+      Response hourlyWeatherResponse = await _dio.get(hourlyWeatherUrl);
+      if (hourlyWeatherResponse.statusCode == 200) {
+        WeatherResponse weatherResponse =
+            WeatherResponse.fromJson(hourlyWeatherResponse.data);
+        if (widget.fromMain) {
+          await DatabaseHelper().updateWeatherResponse(weatherResponse);
+          weatherList = await DatabaseHelper().getWeathers();
+          weatherResponseList = await DatabaseHelper().getWeatherResponseList();
+        } else {
+          weatherList.add(weather);
+          weatherResponseList.add(weatherResponse);
+        }
+        setState(() {
+          loading = false;
+        });
+      } else {
+        throw Exception('Failed to load weather data');
+      }
+    } catch (e) {
+      var errorHandler = ErrorHandler.internal().handleError(e);
+      _showSnackBar("${errorHandler.message}");
     }
+  }
 
-    String uvUrl =
-        "https://api.openweathermap.org/data/2.5/uvi?lat=${city.lat}&lon=${city.lon}&appid=$openWeatherAPIKey";
-
-    Response uvResponse = await _dio.get(uvUrl);
-    if (uvResponse.statusCode == 200) {
-      uv = uvResponse.data['value'];
-    }
-
-    Response hourlyWeatherResponse = await _dio.get(hourlyWeatherUrl);
-    if (hourlyWeatherResponse.statusCode == 200) {
-      setState(() {
-        weatherResponse = WeatherResponse.fromJson(hourlyWeatherResponse.data);
-        loading = false;
-      });
-    } else {
-      throw Exception('Failed to load weather data');
+  _showSnackBar(String errorData) {
+    if (mounted) {
+      final snackBar = SnackBar(
+        content: Text(errorData),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    const pageCount = 3;
+    int pageCount = weatherList.isEmpty ? 1 : weatherList.length;
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -145,28 +194,29 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
                       backgroundColor: Colors.transparent,
                       elevation: 0,
                       onPressed: () async {
-                        List<Weather> weatherList =
-                            await DatabaseHelper().getWeathers();
-                        if (weatherList.length < 6) {
-                          weatherList.add(weather);
-                          await DatabaseHelper().insertWeather(weather);
-                          List<WeatherResponse> weatherDataList =
-                              await DatabaseHelper().getWeatherResponses();
-                          weatherDataList.add(weatherResponse);
-                          await DatabaseHelper()
-                              .insertWeatherResponse(weatherResponse);
-                          showAddCartButton = false;
-                          setState(() {});
-                          const snackBar = SnackBar(
-                            content: Text('Successfully Saved.'),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                        } else {
-                          const snackBar = SnackBar(
-                            content: Text('You have been 5 items'),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                        }
+                        // List<Weather> weatherList =
+                        //     await DatabaseHelper().getWeathers();
+                        // if (weatherList.length < 6) {
+                        //   weatherList.add(weatherList.first);
+                        await DatabaseHelper().insertWeather(weatherList.first);
+                        await DatabaseHelper()
+                            .insertWeatherResponse(weatherResponseList.first);
+                        showAddCartButton = false;
+                        setState(() {});
+                        SnackBar snackBar = SnackBar(
+                          content: Text(
+                            'Successfully Saved.',
+                            style: TextStyle(color: Colors.grey[200]),
+                          ),
+                          backgroundColor: Colors.grey,
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        // } else {
+                        //   const snackBar = SnackBar(
+                        //     content: Text('You have been 5 items'),
+                        //   );
+                        //   ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        // }
                       },
                       label: const Text(
                         'Add to start page',
@@ -206,7 +256,12 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
           ? null
           : IconButton(
               onPressed: () {
-                startScreen(context, const ManageCityScreen());
+                startScreen(context, const ManageCityScreen()).then((v) async {
+                  weatherList = await DatabaseHelper().getWeathers();
+                  weatherResponseList =
+                      await DatabaseHelper().getWeatherResponseList();
+                  setState(() {});
+                });
               },
               icon: const Icon(
                 Icons.add_outlined,
@@ -243,100 +298,103 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
     return PageView.builder(
       controller: _pageController,
       onPageChanged: (page) {
-        setState(() {
-          selectedPage = page;
-        });
+        selectedPage = page;
+        setState(() {});
       },
       itemCount: pageCount,
       itemBuilder: (context, index) {
-        return _buildPageContent(context);
+        return _buildPageContent(
+            context,
+            weatherList.isNotEmpty ? weatherList[index] : null,
+            weatherList.isNotEmpty ? weatherResponseList[index] : null);
       },
     );
   }
 
-  Widget _buildPageContent(BuildContext context) {
-    return Center(
-      child: EasyRefresh(
-          controller: _controller,
-          refreshOnStart: true,
-          header: const ClassicHeader(),
-          footer: null,
-          onRefresh: () {
-            getForecast();
-            _controller.finishRefresh();
-            _controller.resetFooter();
-          },
-          onLoad: () async {
-            _controller.finishLoad(IndicatorResult.none);
-          },
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Column(
-                children: [
-                  loading
-                      ? Shimmer.fromColors(
-                          baseColor: Colors.grey[300]!,
-                          highlightColor: Colors.grey[100]!,
-                          child: Container(
-                            width: MediaQuery.of(context).size.height / 2,
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(15.0),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.blue.withOpacity(0.5),
-                                ),
-                              ],
+  Widget _buildPageContent(BuildContext context, Weather? weather,
+      WeatherResponse? weatherResponse) {
+    return EasyRefresh(
+      controller: _controller,
+      refreshOnStart: true,
+      header: const ClassicHeader(),
+      footer: null,
+      onRefresh: () {
+        getForecast();
+        _controller.finishRefresh();
+        _controller.resetFooter();
+      },
+      onLoad: () async {
+        _controller.finishLoad(IndicatorResult.none);
+      },
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Column(
+            children: [
+              loading || weather == null || weatherResponse == null
+                  ? Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Container(
+                        width: MediaQuery.of(context).size.height / 2,
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(15.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.blue.withOpacity(0.5),
                             ),
-                          ))
-                      : SizedBox(
-                          height: MediaQuery.of(context).size.height / 2,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              _TemperatureDisplay(
-                                weather: weather,
-                              ),
-                            ],
-                          ),
+                          ],
                         ),
-                  const SizedBox(height: 10),
-                  _buildForecastContainer(context),
-                  const SizedBox(height: 10),
-                  _build24HourForecastContainer(),
-                  const SizedBox(height: 10),
-                  _buildWeatherDetailsRow(context),
-                  const SizedBox(height: 10),
-                  const Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "SkySnap has been developed by ",
-                          style: TextStyle(
-                            fontSize: 8,
+                      ))
+                  : SizedBox(
+                      height: MediaQuery.of(context).size.height / 2,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          _TemperatureDisplay(
+                            weather: weather,
                           ),
-                        ),
-                        Text(
-                          " 🌐 Nyein Chan Toe",
-                          style: TextStyle(
-                            fontSize: 8,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+              const SizedBox(height: 10),
+              _buildForecastContainer(context, weatherResponse),
+              const SizedBox(height: 10),
+              _build24HourForecastContainer(weatherResponse),
+              const SizedBox(height: 10),
+              _buildWeatherDetailsRow(context, weather),
+              const SizedBox(height: 10),
+              const Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "SkySnap has been developed by ",
+                      style: TextStyle(
+                        fontSize: 8,
+                      ),
+                    ),
+                    Text(
+                      " 🌐 Nyein Chan Toe",
+                      style: TextStyle(
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          )),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
-  List<WeatherData> filterDataForDate(DateTime targetDate) {
+  List<WeatherData> filterDataForDate(
+      DateTime targetDate, WeatherResponse weatherResponse) {
     return weatherResponse.list.where((weather) {
       DateTime dateTime =
           DateTime.fromMillisecondsSinceEpoch(weather.dt * 1000);
@@ -346,7 +404,8 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
     }).toList();
   }
 
-  Widget _buildForecastContainer(BuildContext context) {
+  Widget _buildForecastContainer(
+      BuildContext context, WeatherResponse? weatherResponse) {
     DateTime today = DateTime.now();
     List<DateTime> targetDates =
         List.generate(5, (index) => today.add(Duration(days: index)));
@@ -369,16 +428,20 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _buildForecastHeader(context),
-              if (loading)
+              Visibility(
+                  visible: weatherResponse != null,
+                  child: _buildForecastHeader(context, weatherResponse)),
+              if (loading || weatherResponse == null)
                 const Expanded(child: ShimmerLoadingWidget())
               else
                 for (DateTime date in targetDates) ...[
                   _buildForecastRow(
                       formatDate(date),
-                      toTitleCase(filterDataForDate(date).first.description),
-                      '${filterDataForDate(date).first.tempMin.toInt()}/${filterDataForDate(date).first.tempMax.toInt()}',
-                      filterDataForDate(date).first.icon),
+                      toTitleCase(filterDataForDate(date, weatherResponse)
+                          .first
+                          .description),
+                      '${filterDataForDate(date, weatherResponse).first.tempMin.toInt()}/${filterDataForDate(date, weatherResponse).first.tempMax.toInt()}',
+                      filterDataForDate(date, weatherResponse).first.icon),
                 ]
             ],
           ),
@@ -405,7 +468,8 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
     }
   }
 
-  Widget _buildForecastHeader(BuildContext context) {
+  Widget _buildForecastHeader(
+      BuildContext context, WeatherResponse? weatherResponse) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -451,8 +515,10 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
             startScreen(
                 context,
                 WeeklyDetailsScreen(
-                  weatherResponse: weatherResponse,
-                ));
+                  weatherResponse: weatherResponse!,
+                )).then((v) {
+              setState(() {});
+            });
           },
         ),
       ],
@@ -466,7 +532,10 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
       children: [
         Row(
           children: [
-            WeatherIconWidget(code: icon),
+            WeatherIconWidget(
+              code: icon,
+              size: 20.0,
+            ),
             const SizedBox(width: 5),
             Text(
               day,
@@ -486,7 +555,7 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
     );
   }
 
-  Widget _build24HourForecastContainer() {
+  Widget _build24HourForecastContainer(WeatherResponse? weatherResponse) {
     return SizedBox(
       height: MediaQuery.of(context).size.height / 3.5,
       child: Container(
@@ -519,10 +588,11 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
                   ),
                 ],
               ),
-              loading
+              loading || weatherResponse == null
                   ? Container()
                   : LineChartWidget(
-                      weatherDataList: filterDataForDate(DateTime.now()),
+                      weatherDataList:
+                          filterDataForDate(DateTime.now(), weatherResponse),
                     ),
             ],
           ),
@@ -531,7 +601,7 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
     );
   }
 
-  Widget _buildWeatherDetailsRow(BuildContext context) {
+  Widget _buildWeatherDetailsRow(BuildContext context, Weather? weather) {
     return SizedBox(
       height: 200,
       child: Row(
@@ -544,7 +614,7 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
-                  child: loading
+                  child: loading || weather == null
                       ? Shimmer.fromColors(
                           baseColor: Colors.grey[300]!,
                           highlightColor: Colors.grey[100]!,
@@ -600,7 +670,7 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
                 ),
                 const SizedBox(height: 10),
                 Expanded(
-                  child: loading
+                  child: loading || weather == null
                       ? Shimmer.fromColors(
                           baseColor: Colors.grey[300]!,
                           highlightColor: Colors.grey[100]!,
@@ -658,7 +728,7 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: loading
+            child: loading || weather == null
                 ? Shimmer.fromColors(
                     baseColor: Colors.grey[300]!,
                     highlightColor: Colors.grey[100]!,
@@ -710,7 +780,7 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Text("UV"),
-                              Text("$uv"),
+                              Text("${weather.uv}"),
                             ],
                           ),
                           const Divider(color: Colors.white, thickness: 0.2),
