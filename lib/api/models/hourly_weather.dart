@@ -51,16 +51,22 @@ class WeatherData {
 }
 
 class WeatherResponse {
+  final int? id;
   final List<WeatherData> list;
   final String name;
 
-  WeatherResponse({required this.list, required this.name});
+  WeatherResponse({
+    this.id,
+    required this.list,
+    required this.name,
+  });
 
   factory WeatherResponse.fromJson(Map<String, dynamic> json) {
     var list = json['list'] as List;
     List<WeatherData> weatherList =
         list.map((i) => WeatherData.fromJson(i)).toList();
     return WeatherResponse(
+      id: json['id'],
       name: json['city']['name'],
       list: weatherList,
     );
@@ -68,6 +74,7 @@ class WeatherResponse {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'city': {'name': name},
       'list': list.map((weather) => weather.toJson()).toList(),
     };

@@ -87,7 +87,7 @@ class Weather {
   }
 
   factory Weather.fromJson(Map<String, dynamic> json) {
-    double windSpeedMps = json['wind']['speed'];
+    double windSpeedMps = json['wind']['speed'].toDouble();
     double windSpeedKmh = windSpeedMps * 3.6;
     return Weather(
         name: json['name'],

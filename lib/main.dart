@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:sky_snap/providers/theme_provider.dart';
 import 'package:sky_snap/root.dart';
+import 'package:sky_snap/utils/database_helper.dart';
 import 'package:sky_snap/utils/resources.dart';
-import 'package:sky_snap/utils/shared_preference.dart';
 import 'package:sky_snap/utils/strings.dart';
 import 'package:provider/provider.dart';
 
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  Preferences.init();
+  await DatabaseHelper().database;
 
   return runApp(
     MultiProvider(

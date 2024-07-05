@@ -11,8 +11,8 @@ import 'package:sky_snap/screens/place_details/line_chart_widget.dart';
 import 'package:sky_snap/screens/place_details/manage_city_screen.dart';
 import 'package:sky_snap/screens/place_details/weekly_details_screen.dart';
 import 'package:sky_snap/utils/colors.dart';
+import 'package:sky_snap/utils/database_helper.dart';
 import 'package:sky_snap/utils/navigation.dart';
-import 'package:sky_snap/utils/shared_preference.dart';
 import 'package:sky_snap/utils/strings.dart';
 import 'package:sky_snap/utils/weather_icon.dart';
 import 'dart:math' as math;
@@ -42,7 +42,7 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
       lon: 72.8479,
       country: "IN",
       state: "Maharashtra");
-  List<Weather> weatherList = Preferences.getWeathers();
+  List<Weather> weatherList = [];
 
   late EasyRefreshController _controller;
   bool showAddCartButton = false;
@@ -51,7 +51,6 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
   void initState() {
     super.initState();
     city = widget.city;
-    weatherList = Preferences.getWeathers();
     if (!widget.fromMain) {
       showAddCartButton = weatherList.isEmpty ||
           !weatherList.any((data) => data.name == city.name);
@@ -68,6 +67,7 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
   }
 
   void getForecast() async {
+    weatherList = await DatabaseHelper().getWeathers();
     String url =
         "https://api.openweathermap.org/data/2.5/weather?q=${city.name},${city.country}&APPID=$openWeatherAPIKey";
 
@@ -135,25 +135,26 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
                     decoration: BoxDecoration(
                       color: Colors.transparent,
                       borderRadius: BorderRadius.circular(25.0),
-                      boxShadow: const [
+                      boxShadow: [
                         BoxShadow(
-                          color: Color.fromARGB(255, 151, 150, 150),
+                          color: Colors.grey[200]!,
                         ),
                       ],
                     ),
                     child: FloatingActionButton.extended(
                       backgroundColor: Colors.transparent,
                       elevation: 0,
-                      onPressed: () {
-                        List<Weather> weatherList = Preferences.getWeathers();
+                      onPressed: () async {
+                        List<Weather> weatherList =
+                            await DatabaseHelper().getWeathers();
                         if (weatherList.length < 6) {
                           weatherList.add(weather);
-                          Preferences.setWeathers(value: weatherList);
+                          await DatabaseHelper().insertWeather(weather);
                           List<WeatherResponse> weatherDataList =
-                              Preferences.getForecastWeathers();
+                              await DatabaseHelper().getWeatherResponses();
                           weatherDataList.add(weatherResponse);
-                          Preferences.setForecastWeathers(
-                              value: weatherDataList);
+                          await DatabaseHelper()
+                              .insertWeatherResponse(weatherResponse);
                           showAddCartButton = false;
                           setState(() {});
                           const snackBar = SnackBar(
@@ -169,17 +170,17 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
                       },
                       label: const Text(
                         'Add to start page',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: Colors.grey),
                       ),
-                      icon:
-                          const Icon(Icons.add, color: Colors.white, size: 25),
+                      icon: const Icon(Icons.add, color: Colors.grey, size: 25),
                     ),
                   )
                 : null,
             body: SafeArea(
               child: Column(
                 children: [
-                  if (pageCount > 1 && widget.fromMain) _buildPageIndicator(pageCount),
+                  if (pageCount > 1 && widget.fromMain)
+                    _buildPageIndicator(pageCount),
                   Expanded(
                     child: _buildPageView(pageCount),
                   ),
@@ -266,7 +267,6 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
             _controller.resetFooter();
           },
           onLoad: () async {
-            // getForecast();
             _controller.finishLoad(IndicatorResult.none);
           },
           child: SingleChildScrollView(

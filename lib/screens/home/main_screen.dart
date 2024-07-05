@@ -44,8 +44,23 @@ class _MyHomePageState extends State<MyHomePage> {
               body: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
-                  const SizedBox(height: 50),
+                  const SizedBox(height: 30),
                   placesAutoCompleteTextField(),
+                  const SizedBox(height: 20),
+                  Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Popular cities',
+                            style: TextStyle(color: Colors.blueGrey),
+                          ),
+                          const SizedBox(height: 10),
+                          PopularCityGroup(),
+                        ],
+                      )),
                 ],
               ),
             )
@@ -135,6 +150,96 @@ class _MyHomePageState extends State<MyHomePage> {
         isCrossBtnShown: true,
         textStyle: TextStyle(color: Colors.black.withOpacity(0.8)),
       ),
+    );
+  }
+}
+
+class PopularCityGroup extends StatelessWidget {
+  final List<City> cities = [
+    City(
+        name: 'New York',
+        lat: 40.7128,
+        lon: -74.0060,
+        country: 'US',
+        state: 'NY'),
+    City(
+        name: 'Los Angeles',
+        lat: 34.0522,
+        lon: -118.2437,
+        country: 'US',
+        state: 'CA'),
+    City(
+        name: 'Tokyo',
+        lat: 35.6895,
+        lon: 139.6917,
+        country: 'Japan',
+        state: 'Tokyo'),
+    City(
+        name: 'London',
+        lat: 51.5074,
+        lon: -0.1278,
+        country: 'UK',
+        state: 'England'),
+    City(
+        name: 'Paris',
+        lat: 48.8566,
+        lon: 2.3522,
+        country: 'France',
+        state: 'Île-de-France'),
+    City(
+        name: 'Sydney',
+        lat: -33.8688,
+        lon: 151.2093,
+        country: 'Australia',
+        state: 'New South Wales'),
+    City(
+        name: 'Dubai',
+        lat: 25.2048,
+        lon: 55.2708,
+        country: 'UAE',
+        state: 'Dubai'),
+    City(
+        name: 'Shanghai',
+        lat: 31.2304,
+        lon: 121.4737,
+        country: 'CN',
+        state: 'Shanghai'),
+    City(
+        name: 'Moscow',
+        lat: 55.7558,
+        lon: 37.6173,
+        country: 'Russia',
+        state: 'Moscow'),
+    City(
+        name: 'Rio de Janeiro',
+        lat: -22.9068,
+        lon: -43.1729,
+        country: 'Brazil',
+        state: 'Rio de Janeiro'),
+  ];
+
+  PopularCityGroup({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8.0,
+      runSpacing: 4.0,
+      children: cities.map((city) {
+        return ElevatedButton(
+          onPressed: () {
+            startScreen(context, WeatherDetailsScreen(city: city, fromMain: false));
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.grey[200],
+            foregroundColor: Colors.grey,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+          ),
+          child: Text(city.name),
+        );
+      }).toList(),
     );
   }
 }

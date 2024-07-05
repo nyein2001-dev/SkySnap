@@ -15,7 +15,6 @@ class ThemeProvider extends ChangeNotifier {
   void changeThemeMode(BuildContext context) {
     AlertDialog(
       title: const Text('Theme Mode'),
-      // blur: 10,
       content: Consumer<ThemeProvider>(
         builder: (context, provider, child) => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

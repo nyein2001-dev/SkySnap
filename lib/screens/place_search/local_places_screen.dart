@@ -74,7 +74,6 @@ class _PlaceAutoCompleteTextFieldState
                 decoration: widget.inputDecoration,
                 style: widget.textStyle,
                 controller: widget.textEditingController,
-                // autocorrect: true,
                 autofocus: true,
                 onChanged: (string) {
                   subject.add(string);
