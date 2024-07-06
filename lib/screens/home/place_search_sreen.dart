@@ -113,13 +113,15 @@ class MyHomePage extends StatelessWidget {
           bool showAddCartButton = weatherList.isEmpty ||
               !weatherList.any((data) => data.name == suggestion.name);
           controller.clear();
-          startScreen(
-              context,
-              MainScreen(
-                city: suggestion,
-                fromMain: false,
-                show: showAddCartButton,
-              ));
+          if (context.mounted) {
+            startScreen(
+                context,
+                MainScreen(
+                  city: suggestion,
+                  fromMain: false,
+                  show: showAddCartButton,
+                ));
+          }
         },
         seperatedBuilder: const Divider(
           color: Colors.transparent,
@@ -243,13 +245,15 @@ class PopularCityGroup extends StatelessWidget {
             List<Weather> weatherList = await DatabaseHelper().getWeathers();
             bool showAddCartButton = weatherList.isEmpty ||
                 !weatherList.any((data) => data.name == city.name);
-            startScreen(
-                context,
-                MainScreen(
-                  city: city,
-                  fromMain: false,
-                  show: showAddCartButton,
-                ));
+            if (context.mounted) {
+              startScreen(
+                  context,
+                  MainScreen(
+                    city: city,
+                    fromMain: false,
+                    show: showAddCartButton,
+                  ));
+            }
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.grey[200],

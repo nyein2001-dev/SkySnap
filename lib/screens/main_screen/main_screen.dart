@@ -179,17 +179,19 @@ class MainScreenView extends StatelessWidget {
                     await DatabaseHelper().insertWeather(weatherList.first);
                     await DatabaseHelper()
                         .insertWeatherResponse(weatherResponseList.first);
-                    BlocProvider.of<WeatherBloc>(context).add(
-                        LoadWeatherFromDatabase(
-                            showLoading: false,
-                            city: City(
-                                name: weatherList.first.name,
-                                lat: weatherList.first.lat,
-                                lon: weatherList.first.lon,
-                                country: weatherList.first.country,
-                                state: ''),
-                            fromMain: fromMain));
-                    showSnackBar(context, "Successfully Saved.");
+                    if (context.mounted) {
+                      BlocProvider.of<WeatherBloc>(context).add(
+                          LoadWeatherFromDatabase(
+                              showLoading: false,
+                              city: City(
+                                  name: weatherList.first.name,
+                                  lat: weatherList.first.lat,
+                                  lon: weatherList.first.lon,
+                                  country: weatherList.first.country,
+                                  state: ''),
+                              fromMain: fromMain));
+                      showSnackBar(context, "Successfully Saved.");
+                    }
                   }
                 },
                 label: Text(

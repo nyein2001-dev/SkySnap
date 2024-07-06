@@ -21,41 +21,45 @@ main() async {
       theme: darkTheme,
       debugShowCheckedModeBanner: false,
       title: appName,
-      home: const MyApp(),
+      home: MyApp(),
     ),
   );
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class MyApp extends StatelessWidget {
+  MyApp({super.key});
 
-  @override
-  MyAppState createState() => MyAppState();
-}
-
-class MyAppState extends State<MyApp> {
-  NetworkInfo networkInfo = NetworkInfo(Connectivity());
-  @override
-  void initState() {
-    init();
-    super.initState();
-  }
-
-  init() async {
-    bool isConnected = await networkInfo.isConnected;
-    if (isConnected) {
-      changeScreen();
-    } else {
-      changeScreenDirectly();
-    }
-  }
+  final NetworkInfo networkInfo = NetworkInfo(Connectivity());
 
   @override
   Widget build(BuildContext context) {
-    return const SplashScreen();
+    return FutureBuilder<bool>(
+      future: _init(context),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SplashScreen();
+        } else {
+          if (snapshot.hasError || !snapshot.data!) {
+            return const SplashScreen();
+          } else {
+            return const SplashScreen();
+          }
+        }
+      },
+    );
   }
 
-  void changeScreen() async {
+  Future<bool> _init(BuildContext context) async {
+    bool isConnected = await networkInfo.isConnected;
+    if (isConnected && context.mounted) {
+      await _changeScreen(context);
+    } else if (context.mounted) {
+      await _changeScreenDirectly(context);
+    }
+    return isConnected;
+  }
+
+  Future<void> _changeScreen(BuildContext context) async {
     try {
       Weather? weather =
           await ServersHttp().getWeather(city: "Mumbai", countryCode: "IN");
@@ -70,39 +74,46 @@ class MyAppState extends State<MyApp> {
         await DatabaseHelper().updateWeatherResponse(hourlyWeather);
       }
 
-      replaceScreen(
-        context,
-        MainScreen(
-          fromMain: true,
-          city: City(
+      if (context.mounted) {
+        replaceScreen(
+          context,
+          MainScreen(
+            fromMain: true,
+            city: City(
               name: "Mumbai",
               lat: 19.0144,
               lon: 72.8479,
               country: "IN",
-              state: "Maharashtra"),
-          show: false,
-        ),
-      );
+              state: "Maharashtra",
+            ),
+            show: false,
+          ),
+        );
+      }
     } catch (e) {
-      changeScreenDirectly();
+      if (context.mounted) {
+        await _changeScreenDirectly(context);
+      }
     }
   }
 
-  void changeScreenDirectly() {
-    Future.delayed(const Duration(seconds: 5), () {
+  Future<void> _changeScreenDirectly(BuildContext context) async {
+    await Future.delayed(const Duration(seconds: 5));
+    if (context.mounted) {
       replaceScreen(
         context,
         MainScreen(
           fromMain: true,
           city: City(
-              name: "Mumbai",
-              lat: 19.0144,
-              lon: 72.8479,
-              country: "IN",
-              state: "Maharashtra"),
-              show: false,
+            name: "Mumbai",
+            lat: 19.0144,
+            lon: 72.8479,
+            country: "IN",
+            state: "Maharashtra",
+          ),
+          show: false,
         ),
       );
-    });
+    }
   }
 }

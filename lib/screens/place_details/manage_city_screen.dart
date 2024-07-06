@@ -100,20 +100,22 @@ class ManageCityScreen extends StatelessWidget {
                               bool showAddCartButton = weatherList.isEmpty ||
                                   !weatherList.any(
                                       (weather) => weather.name == data.name);
-                              startScreen(
-                                context,
-                                MainScreen(
-                                  show: showAddCartButton,
-                                  city: City(
-                                    name: data.name,
-                                    lat: data.lat,
-                                    lon: data.lon,
-                                    country: data.country,
-                                    state: '',
+                              if (context.mounted) {
+                                startScreen(
+                                  context,
+                                  MainScreen(
+                                    show: showAddCartButton,
+                                    city: City(
+                                      name: data.name,
+                                      lat: data.lat,
+                                      lon: data.lon,
+                                      country: data.country,
+                                      state: '',
+                                    ),
+                                    fromMain: false,
                                   ),
-                                  fromMain: false,
-                                ),
-                              );
+                                );
+                              }
                             },
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
