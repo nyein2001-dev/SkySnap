@@ -4,23 +4,15 @@ SkySnap is a simple and intuitive weather application built using Flutter. It pr
 
 ## Features
 
-- **Home Screen:**
-  - Search bar for entering a city name
-  - Button to trigger weather search
-  - Loading indicator while fetching data
-
-- **Weather Details Screen:**
-  - Displays city name, current temperature (in Celsius), weather condition, an icon representing the weather condition, humidity percentage, and wind speed
-  - Refresh button to fetch updated weather data
-
-- **Error Handling:**
-  - Proper error handling for API requests with user-friendly error messages
-
-- **State Management:**
-  - Utilizes state management (e.g., setState, Provider) to manage app state
- 
-- **Data Persistence:**
-  - Saves the last searched city for quick access
+- **Splash Screen**: Initializes all weather data and updates the local database from the server.
+- **Main Screen**: Displays weather data for multiple cities with automatic updates.
+- **Pager**: Swipe through different cities' weather data.
+- **Wind Clock**: Visual representation of wind direction (N, E, W, S).
+- **24-Hour Forecast**: Line chart showing temperature, pressure, and weather icons.
+- **5-Day Forecast**: General data including min/max temp, pressure, and weather icons.
+- **Detailed 5-Day Forecast**: 24-hour forecast for each day with line charts.
+- **Manage Cities**: Add or remove cities from the main screen pager.
+- **Search Cities**: Autocomplete search suggestions for adding new cities.
  
 ---
  
