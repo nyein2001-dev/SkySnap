@@ -8,58 +8,53 @@ import 'package:sky_snap/utils/database_helper.dart';
 import 'package:sky_snap/utils/navigation.dart';
 import 'package:sky_snap/utils/weather_icon.dart';
 
-class ManageCityScreen extends StatefulWidget {
-  const ManageCityScreen({super.key});
-
-  @override
-  State<ManageCityScreen> createState() => _ManageCityScreenState();
-}
-
-class _ManageCityScreenState extends State<ManageCityScreen> {
-  List<Weather> weatherList = [];
-  @override
-  void initState() {
+class ManageCityScreen extends StatelessWidget {
+  ManageCityScreen({super.key}) {
     init();
-    super.initState();
   }
 
+  final ValueNotifier<List<Weather>> weatherListNotifier =
+      ValueNotifier<List<Weather>>([]);
+
   void init() async {
-    weatherList = await DatabaseHelper().getWeathers();
-    setState(() {});
+    weatherListNotifier.value = await DatabaseHelper().getWeathers();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color.fromARGB(255, 132, 214, 252),
-                Color.fromARGB(255, 132, 214, 252),
-              ],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
-            color: Colors.lightBlueAccent),
-        child: Stack(fit: StackFit.expand, children: [
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color.fromARGB(255, 132, 214, 252),
+            Color.fromARGB(255, 132, 214, 252),
+          ],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        color: Colors.lightBlueAccent,
+      ),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
           Image.asset(
             'assets/background_world.png',
             fit: BoxFit.fitHeight,
             color: primaryColor.withOpacity(0.5),
           ),
           Scaffold(
-              appBar: AppBar(
-                automaticallyImplyLeading: true,
-                iconTheme: const IconThemeData(color: Colors.white),
-                title: const Text(
-                  'Manage Cities',
-                  style: TextStyle(color: Colors.white),
-                ),
-                backgroundColor: Colors.transparent,
+            appBar: AppBar(
+              automaticallyImplyLeading: true,
+              iconTheme: const IconThemeData(color: Colors.white),
+              title: const Text(
+                'Manage Cities',
+                style: TextStyle(color: Colors.white),
               ),
               backgroundColor: Colors.transparent,
-              body: SingleChildScrollView(
-                  child: Column(
+            ),
+            backgroundColor: Colors.transparent,
+            body: SingleChildScrollView(
+              child: Column(
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(
@@ -93,89 +88,105 @@ class _ManageCityScreenState extends State<ManageCityScreen> {
                       ),
                     ),
                   ),
-                  for (Weather data in weatherList) ...[
-                    InkWell(
-                      onTap: () async {
-                        List<Weather> weatherList =
-                            await DatabaseHelper().getWeathers();
-                        bool showAddCartButton = weatherList.isEmpty ||
-                            !weatherList.any((data) => data.name == data.name);
-                        startScreen(
-                            context,
-                            MainScreen(
-                                show: showAddCartButton,
-                                city: City(
+                  ValueListenableBuilder<List<Weather>>(
+                    valueListenable: weatherListNotifier,
+                    builder: (context, weatherList, child) {
+                      return Column(
+                        children: weatherList.map((data) {
+                          return InkWell(
+                            onTap: () async {
+                              List<Weather> weatherList =
+                                  await DatabaseHelper().getWeathers();
+                              bool showAddCartButton = weatherList.isEmpty ||
+                                  !weatherList.any(
+                                      (weather) => weather.name == data.name);
+                              startScreen(
+                                context,
+                                MainScreen(
+                                  show: showAddCartButton,
+                                  city: City(
                                     name: data.name,
                                     lat: data.lat,
                                     lon: data.lon,
                                     country: data.country,
-                                    state: ''),
-                                fromMain: false));
-                      },
-                      child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
-                          child: Container(
-                            height: MediaQuery.of(context).size.height / 8,
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(15.0),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.blue.withOpacity(0.5),
+                                    state: '',
+                                  ),
+                                  fromMain: false,
                                 ),
-                              ],
-                            ),
+                              );
+                            },
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 15),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                  horizontal: 10, vertical: 5),
+                              child: Container(
+                                height: MediaQuery.of(context).size.height / 8,
+                                decoration: BoxDecoration(
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.circular(15.0),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.blue.withOpacity(0.5),
+                                    ),
+                                  ],
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 15),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      WeatherIconWidget(
-                                        code: data.iconCode,
-                                        size: 40.0,
-                                      ),
-                                      const SizedBox(
-                                        width: 10,
-                                      ),
-                                      Column(
+                                      Row(
                                         mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
+                                            MainAxisAlignment.center,
                                         crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                            CrossAxisAlignment.center,
                                         children: [
-                                          Text(
-                                            data.name,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold),
+                                          WeatherIconWidget(
+                                            code: data.iconCode,
+                                            size: 40.0,
                                           ),
-                                          Text(
-                                              "${toTitleCase(data.description)} ${data.tempMin.toInt()}/${data.tempMax.toInt()}")
+                                          const SizedBox(width: 10),
+                                          Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceEvenly,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                data.name,
+                                                style: const TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                              Text(
+                                                  "${toTitleCase(data.description)} ${data.tempMin.toInt()}/${data.tempMax.toInt()}"),
+                                            ],
+                                          ),
                                         ],
-                                      )
+                                      ),
+                                      Text(
+                                        "${data.temp.toInt()}\u00b0",
+                                        style: const TextStyle(
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.bold),
+                                      ),
                                     ],
                                   ),
-                                  Text(
-                                    "${data.temp.toInt()}\u00b0",
-                                    style: const TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold),
-                                  )
-                                ],
+                                ),
                               ),
                             ),
-                          )),
-                    ),
-                  ]
+                          );
+                        }).toList(),
+                      );
+                    },
+                  ),
                 ],
-              )))
-        ]));
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

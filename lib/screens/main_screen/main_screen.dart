@@ -143,7 +143,7 @@ class MainScreenView extends StatelessWidget {
           ? null
           : IconButton(
               onPressed: () {
-                startScreen(context, const ManageCityScreen());
+                startScreen(context, ManageCityScreen());
               },
               icon: const Icon(
                 Icons.add_outlined,
@@ -217,7 +217,7 @@ class MainScreenView extends StatelessWidget {
           ? null
           : IconButton(
               onPressed: () {
-                startScreen(context, const ManageCityScreen()).then((v) async {
+                startScreen(context, ManageCityScreen()).then((v) async {
                   BlocProvider.of<WeatherBloc>(context).add(
                       LoadWeatherFromDatabase(
                           showLoading: false,

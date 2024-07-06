@@ -37,7 +37,7 @@ class LoadingWidget extends StatelessWidget {
           ? null
           : IconButton(
               onPressed: () {
-                startScreen(context, const ManageCityScreen());
+                startScreen(context, ManageCityScreen());
               },
               icon: const Icon(
                 Icons.add_outlined,
