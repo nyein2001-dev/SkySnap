@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:sky_snap/api/models/city.dart';
-import 'package:sky_snap/screens/place_details/weather_details_screen.dart';
+import 'package:sky_snap/api/models/weather.dart';
+import 'package:sky_snap/screens/main_screen/main_screen.dart';
 import 'package:sky_snap/screens/place_search/local_places_screen.dart';
 import 'package:sky_snap/utils/colors.dart';
+import 'package:sky_snap/utils/database_helper.dart';
 import 'package:sky_snap/utils/navigation.dart';
 import 'package:sky_snap/utils/strings.dart';
 
@@ -113,13 +115,17 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
         debounceTime: 400,
-        itemClick: (City suggestion) {
+        itemClick: (City suggestion) async {
+          List<Weather> weatherList = await DatabaseHelper().getWeathers();
+          bool showAddCartButton = weatherList.isEmpty ||
+              !weatherList.any((data) => data.name == suggestion.name);
           controller.clear();
           startScreen(
               context,
-              WeatherDetailsScreen(
+              MainScreen(
                 city: suggestion,
                 fromMain: false,
+                show: showAddCartButton,
               )).then((v) {
             setState(() {});
           });
@@ -242,9 +248,17 @@ class PopularCityGroup extends StatelessWidget {
       runSpacing: 4.0,
       children: cities.map((city) {
         return ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
+            List<Weather> weatherList = await DatabaseHelper().getWeathers();
+            bool showAddCartButton = weatherList.isEmpty ||
+                !weatherList.any((data) => data.name == city.name);
             startScreen(
-                context, WeatherDetailsScreen(city: city, fromMain: false));
+                context,
+                MainScreen(
+                  city: city,
+                  fromMain: false,
+                  show: showAddCartButton,
+                ));
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.grey[200],

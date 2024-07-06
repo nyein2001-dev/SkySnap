@@ -4,6 +4,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:sky_snap/api/models/city.dart';
 import 'package:sky_snap/utils/dio_error_handler.dart';
 import 'package:sky_snap/utils/navigation.dart';
+import 'package:sky_snap/utils/snack_bar.dart';
 
 class PlaceAutoCompleteTextField extends StatefulWidget {
   final InputDecoration inputDecoration;
@@ -171,7 +172,7 @@ class _PlaceAutoCompleteTextFieldState
       Overlay.of(context).insert(_overlayEntry!);
     } catch (e) {
       var errorHandler = ErrorHandler.internal().handleError(e);
-      _showSnackBar("${errorHandler.message}");
+      showSnackBar(context, "${errorHandler.message}");
 
       setState(() {
         isLoading = false;
@@ -292,26 +293,13 @@ class _PlaceAutoCompleteTextFieldState
         _overlayEntry?.remove();
       } catch (e) {
         var errorHandler = ErrorHandler.internal().handleError(e);
-        _showSnackBar("${errorHandler.message}");
+        showSnackBar(context, "${errorHandler.message}");
       }
     }
   }
 
   _showCrossIconWidget() {
     return (widget.textEditingController.text.isNotEmpty);
-  }
-
-  _showSnackBar(String errorData) {
-    if (widget.showError && mounted) {
-      final snackBar = SnackBar(
-        backgroundColor: Colors.grey,
-        content: Text(
-          errorData,
-          style: TextStyle(color: Colors.grey[200]),
-        ),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    }
   }
 }
 

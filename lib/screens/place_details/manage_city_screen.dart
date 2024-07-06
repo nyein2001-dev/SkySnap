@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sky_snap/api/models/city.dart';
 import 'package:sky_snap/api/models/weather.dart';
-import 'package:sky_snap/screens/home/main_screen.dart';
-import 'package:sky_snap/screens/place_details/weather_details_screen.dart';
+import 'package:sky_snap/screens/home/place_search_sreen.dart';
+import 'package:sky_snap/screens/main_screen/main_screen.dart';
 import 'package:sky_snap/utils/colors.dart';
 import 'package:sky_snap/utils/database_helper.dart';
 import 'package:sky_snap/utils/navigation.dart';
@@ -96,10 +96,15 @@ class _ManageCityScreenState extends State<ManageCityScreen> {
                   ),
                   for (Weather data in weatherList) ...[
                     InkWell(
-                      onTap: () {
+                      onTap: () async {
+                        List<Weather> weatherList =
+                            await DatabaseHelper().getWeathers();
+                        bool showAddCartButton = weatherList.isEmpty ||
+                            !weatherList.any((data) => data.name == data.name);
                         startScreen(
                             context,
-                            WeatherDetailsScreen(
+                            MainScreen(
+                                show: showAddCartButton,
                                 city: City(
                                     name: data.name,
                                     lat: data.lat,
