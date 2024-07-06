@@ -55,8 +55,7 @@ class _PlaceAutoCompleteTextFieldState
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) =>
-          PlaceAutoCompleteBloc(),
+      create: (context) => PlaceAutoCompleteBloc(),
       child: BlocConsumer<PlaceAutoCompleteBloc, PlaceAutoCompleteState>(
         listener: (context, state) {
           if (state is PlaceAutoCompleteError && widget.showError) {
@@ -90,6 +89,10 @@ class _PlaceAutoCompleteTextFieldState
                       controller: widget.textEditingController,
                       autofocus: true,
                       onChanged: (string) {
+                        if (string.isEmpty) {
+                          _removeOverlay();
+                          return;
+                        }
                         context
                             .read<PlaceAutoCompleteBloc>()
                             .subject
@@ -97,7 +100,7 @@ class _PlaceAutoCompleteTextFieldState
                       },
                     ),
                   ),
-                  if (widget.isCrossBtnShown)
+                  if (widget.isCrossBtnShown && _showCrossIconWidget())
                     IconButton(
                       onPressed: () {
                         widget.textEditingController.clear();
@@ -133,16 +136,22 @@ class _PlaceAutoCompleteTextFieldState
     );
   }
 
-  void _showOverlay(BuildContext context, PlaceAutoCompleteState state) {
-    if (_isOverlayShown) {
-      _overlayEntry?.remove();
-      _isOverlayShown = false;
-    }
+  _showCrossIconWidget() {
+    return (widget.textEditingController.text.isNotEmpty);
+  }
 
-    _overlayEntry = _createOverlayEntry(context, state);
-    if (_overlayEntry != null) {
-      Overlay.of(context).insert(_overlayEntry!);
-      _isOverlayShown = true;
+  void _showOverlay(BuildContext context, PlaceAutoCompleteState state) {
+    if (_showCrossIconWidget()) {
+      if (_isOverlayShown) {
+        _overlayEntry?.remove();
+        _isOverlayShown = false;
+      }
+
+      _overlayEntry = _createOverlayEntry(context, state);
+      if (_overlayEntry != null) {
+        Overlay.of(context).insert(_overlayEntry!);
+        _isOverlayShown = true;
+      }
     }
   }
 

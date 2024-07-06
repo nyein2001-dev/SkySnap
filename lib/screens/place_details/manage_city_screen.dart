@@ -68,8 +68,7 @@ class _ManageCityScreenState extends State<ManageCityScreen> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => const MyHomePage()),
+                          MaterialPageRoute(builder: (context) => MyHomePage()),
                         );
                       },
                       child: Container(

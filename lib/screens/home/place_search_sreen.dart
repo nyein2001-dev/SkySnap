@@ -7,29 +7,17 @@ import 'package:sky_snap/utils/colors.dart';
 import 'package:sky_snap/utils/database_helper.dart';
 import 'package:sky_snap/utils/navigation.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, this.title});
-
+class MyHomePage extends StatelessWidget {
   final String? title;
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  TextEditingController controller = TextEditingController();
-
-  bool isTextFieldEmpty = true;
-
-  @override
-  void initState() {
-    super.initState();
+  MyHomePage({super.key, this.title}) {
     controller.addListener(() {
-      setState(() {
-        isTextFieldEmpty = controller.text.isEmpty;
-      });
+      isTextFieldEmpty.value = controller.text.isEmpty;
     });
   }
+
+  final TextEditingController controller = TextEditingController();
+  final ValueNotifier<bool> isTextFieldEmpty = ValueNotifier<bool>(true);
 
   @override
   Widget build(BuildContext context) {
@@ -58,23 +46,30 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   const SizedBox(height: 30),
-                  placesAutoCompleteTextField(),
+                  placesAutoCompleteTextField(context),
                   const SizedBox(height: 20),
-                  if (isTextFieldEmpty)
-                    Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Popular cities',
-                              style: TextStyle(color: Colors.blueGrey),
-                            ),
-                            const SizedBox(height: 10),
-                            PopularCityGroup(),
-                          ],
-                        )),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: isTextFieldEmpty,
+                    builder: (context, value, child) {
+                      return value
+                          ? Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Popular cities',
+                                    style: TextStyle(color: Colors.blueGrey),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  PopularCityGroup(),
+                                ],
+                              ))
+                          : Container();
+                    },
+                  )
                 ],
               ),
             )
@@ -82,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ));
   }
 
-  placesAutoCompleteTextField() {
+  placesAutoCompleteTextField(BuildContext context) {
     return Container(
       height: 40,
       padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -124,9 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 city: suggestion,
                 fromMain: false,
                 show: showAddCartButton,
-              )).then((v) {
-            setState(() {});
-          });
+              ));
         },
         seperatedBuilder: const Divider(
           color: Colors.transparent,
