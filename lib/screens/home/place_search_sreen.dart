@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:sky_snap/api/models/city.dart';
 import 'package:sky_snap/api/models/weather.dart';
 import 'package:sky_snap/screens/main_screen/main_screen.dart';
-import 'package:sky_snap/screens/place_search/local_places_screen.dart';
+import 'package:sky_snap/screens/place_search/place_auto_complete_text_field.dart';
 import 'package:sky_snap/utils/colors.dart';
 import 'package:sky_snap/utils/database_helper.dart';
 import 'package:sky_snap/utils/navigation.dart';
-import 'package:sky_snap/utils/strings.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, this.title});
@@ -89,7 +88,6 @@ class _MyHomePageState extends State<MyHomePage> {
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: PlaceAutoCompleteTextField(
         textEditingController: controller,
-        openWeatherAPIKey: openWeatherAPIKey,
         inputDecoration: InputDecoration(
           prefixIcon: const Icon(
             Icons.search_rounded,
@@ -114,7 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
             borderRadius: BorderRadius.circular(20),
           ),
         ),
-        debounceTime: 400,
+        // debounceTime: 400,
         itemClick: (City suggestion) async {
           List<Weather> weatherList = await DatabaseHelper().getWeathers();
           bool showAddCartButton = weatherList.isEmpty ||

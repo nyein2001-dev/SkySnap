@@ -100,7 +100,11 @@ class _LineChartWidgetState extends State<LineChartWidget> {
   List<FlSpot> generateFlSpots(List<int> temperatures, int smallestTemperature,
       int temperatureDifference) {
     List<FlSpot> spots = [];
-    double scale = (temperatureDifference > 4) ? 0.5 : 1;
+    double scale = (temperatureDifference > 8)
+        ? 0.25
+        : (temperatureDifference > 4)
+            ? 0.5
+            : 1;
     double offset = (temperatureDifference > 4) ? 0 : 1;
     double computeYValue(int temperature) {
       return (temperature - smallestTemperature).toDouble() * scale + offset;
@@ -222,7 +226,10 @@ class WeatherInfo extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        WeatherIconWidget(code: iconCode, size: 20.0,),
+        WeatherIconWidget(
+          code: iconCode,
+          size: 20.0,
+        ),
         Text(windSpeed),
         Text(time),
       ],

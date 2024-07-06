@@ -59,22 +59,18 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
           .getHourlyWeather(city: city.name, countryCode: city.country);
 
       if (weather != null) {
-        // Fetch UV index
         weather.uv =
             await ServersHttp().getUVI(lat: weather.lat, lng: weather.lon);
         if (event.fromMain) {
-          // Update weather in the database if from main screen
           await DatabaseHelper().updateWeather(weather);
         }
       }
 
       if (event.fromMain) {
         if (hourlyWeather != null) {
-          // Update hourly weather in the database if from main screen
           await DatabaseHelper().updateWeatherResponse(hourlyWeather);
         }
 
-        // Load updated data from the database
         List<Weather> updatedWeatherList = await DatabaseHelper().getWeathers();
         List<WeatherResponse> updatedWeatherResponseList =
             await DatabaseHelper().getWeatherResponseList();
@@ -83,7 +79,6 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
             weatherList: updatedWeatherList,
             weatherResponseList: updatedWeatherResponseList));
       } else {
-        // Emit fresh data from API directly if not from main screen
         if (weather != null && hourlyWeather != null) {
           emit(WeatherLoaded(
               weatherList: [weather], weatherResponseList: [hourlyWeather]));
