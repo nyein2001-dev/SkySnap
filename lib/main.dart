@@ -18,7 +18,7 @@ main() async {
 
   return runApp(
     MaterialApp(
-      theme: darkTheme,
+      theme: theme,
       debugShowCheckedModeBanner: false,
       title: appName,
       home: MyApp(),

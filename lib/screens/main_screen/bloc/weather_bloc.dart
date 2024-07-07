@@ -97,12 +97,12 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
             emit(WeatherLoaded(
                 weatherList: [weather], weatherResponseList: [hourlyWeather]));
           } else {
-            // emit(const WeatherError(message: "No data found."));
+            emit(const WeatherError(message: "No data found."));
           }
         }
       }
     } catch (e) {
-      // emit(WeatherError(message: "Failed to fetch data: ${e.toString()}"));
+      emit(WeatherError(message: "Failed to fetch data: ${e.toString()}"));
     }
   }
 }

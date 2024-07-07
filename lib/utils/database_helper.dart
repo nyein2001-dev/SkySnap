@@ -107,15 +107,6 @@ class DatabaseHelper {
     }
   }
 
-  // Future<void> deleteWeather(int id) async {
-  //   final db = await database;
-  //   await db.delete(
-  //     'weather',
-  //     where: 'id = ?',
-  //     whereArgs: [id],
-  //   );
-  // }
-
   Future<Weather?> getWeatherByName(String name) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
@@ -162,14 +153,6 @@ class DatabaseHelper {
     }
     return responseId;
   }
-
-  // Future<List<WeatherData>> getWeatherDataList() async {
-  //   final db = await database;
-  //   final List<Map<String, dynamic>> maps = await db.query('weather_data');
-  //   return List.generate(maps.length, (i) {
-  //     return WeatherData.fromSqlJson(maps[i]);
-  //   });
-  // }
 
   Future<WeatherResponse?> getWeatherResponse(String name) async {
     final db = await database;
@@ -266,29 +249,4 @@ class DatabaseHelper {
       await insertWeatherResponse(response);
     }
   }
-
-  // Future<int> deleteWeatherData(int dt) async {
-  //   final db = await database;
-  //   return await db.delete(
-  //     'weather_data',
-  //     where: 'dt = ?',
-  //     whereArgs: [dt],
-  //   );
-  // }
-
-  // Future<int> deleteWeatherResponse(String name) async {
-  //   final db = await database;
-  //   final response = await getWeatherResponse(name);
-  //   if (response != null) {
-  //     for (var data in response.list) {
-  //       await deleteWeatherData(data.dt);
-  //     }
-  //     return await db.delete(
-  //       'weather_response',
-  //       where: 'name = ?',
-  //       whereArgs: [name],
-  //     );
-  //   }
-  //   return 0;
-  // }
 }

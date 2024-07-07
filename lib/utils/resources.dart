@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sky_snap/utils/colors.dart';
 
-ThemeData get darkTheme => ThemeData.dark(useMaterial3: false).copyWith(
+ThemeData get theme => ThemeData.dark(useMaterial3: false).copyWith(
       primaryColor: primaryColor,
       scaffoldBackgroundColor: backgroundDark,
       radioTheme: RadioThemeData(

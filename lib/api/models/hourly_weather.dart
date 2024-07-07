@@ -77,7 +77,6 @@ class WeatherResponse {
     );
   }
 
-  // Method to convert a WeatherResponse object into a JSON map
   Map<String, dynamic> toSqlJson() {
     return {
       'id': id,

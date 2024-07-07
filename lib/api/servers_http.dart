@@ -11,7 +11,7 @@ class ServersHttp extends HttpConnection {
       {required String city, required String countryCode}) async {
     Map<String, dynamic>? resp = await get<Map<String, dynamic>>(
         "data/2.5/weather?q=$city,$countryCode&APPID=$openWeatherAPIKey",
-        printDebug: true);
+        printDebug: false);
     if (resp != null) {
       return Weather.fromJson(resp);
     }
@@ -22,7 +22,7 @@ class ServersHttp extends HttpConnection {
       {required String city, required String countryCode}) async {
     Map<String, dynamic>? resp = await get<Map<String, dynamic>>(
         "data/2.5/forecast?q=$city,$countryCode&APPID=$openWeatherAPIKey",
-        printDebug: true);
+        printDebug: false);
     if (resp != null) {
       return WeatherResponse.fromJson(resp);
     }
@@ -32,7 +32,7 @@ class ServersHttp extends HttpConnection {
   Future<double> getUVI({required double lat, required double lng}) async {
     Map<String, dynamic>? resp = await get<Map<String, dynamic>>(
         "data/2.5/uvi?lat=$lat&lon=$lng&APPID=$openWeatherAPIKey",
-        printDebug: true);
+        printDebug: false);
     if (resp != null) {
       return resp['value'];
     }
@@ -43,7 +43,7 @@ class ServersHttp extends HttpConnection {
     try {
       List<dynamic>? resp = await get<List<dynamic>>(
           "/geo/1.0/direct?q=$text&limit=5&APPID=$openWeatherAPIKey",
-          printDebug: true);
+          printDebug: false);
       if (resp != null) {
         return resp.map((json) => City.fromJson(json)).toList();
       }
