@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sky_snap/utils/colors.dart';
 
 class EmptyWidget extends StatelessWidget {
   final String emptyTitle;
@@ -19,7 +20,7 @@ class EmptyWidget extends StatelessWidget {
           child: Icon(
             Icons.not_listed_location,
             size: 80,
-            color: Colors.blue,
+            color: primaryColor,
           ),
         ),
         const SizedBox(
@@ -38,7 +39,7 @@ class EmptyWidget extends StatelessWidget {
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.grey[200],
+            color: textColor,
           ),
         ),
         const SizedBox(height: 16),

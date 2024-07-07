@@ -22,16 +22,8 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color.fromARGB(255, 132, 214, 252),
-                Color.fromARGB(255, 132, 214, 252),
-              ],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
-            color: Colors.lightBlueAccent),
+        decoration:
+            BoxDecoration(gradient: backgroundGradient, color: primaryColor),
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -41,7 +33,7 @@ class MyHomePage extends StatelessWidget {
               color: primaryColor.withOpacity(0.5),
             ),
             Scaffold(
-              backgroundColor: Colors.transparent,
+              backgroundColor: transparentColor,
               body: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
@@ -61,7 +53,7 @@ class MyHomePage extends StatelessWidget {
                                 children: [
                                   const Text(
                                     'Popular cities',
-                                    style: TextStyle(color: Colors.blueGrey),
+                                    style: TextStyle(color: backgroundDark),
                                   ),
                                   const SizedBox(height: 10),
                                   PopularCityGroup(),
@@ -86,28 +78,27 @@ class MyHomePage extends StatelessWidget {
         inputDecoration: InputDecoration(
           prefixIcon: const Icon(
             Icons.search_rounded,
-            color: Colors.grey,
+            color: textBackgroundColor,
           ),
           hintText: 'Enter location',
-          hintStyle: const TextStyle(color: Colors.grey),
+          hintStyle: const TextStyle(color: textBackgroundColor),
           filled: true,
           contentPadding:
               const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
-          fillColor: Colors.grey[200],
+          fillColor: textColor,
           border: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.transparent, width: 0),
+            borderSide: const BorderSide(color: transparentColor, width: 0),
             borderRadius: BorderRadius.circular(20),
           ),
           enabledBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.transparent, width: 0),
+            borderSide: const BorderSide(color: transparentColor, width: 0),
             borderRadius: BorderRadius.circular(20),
           ),
           focusedBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.transparent, width: 0),
+            borderSide: const BorderSide(color: transparentColor, width: 0),
             borderRadius: BorderRadius.circular(20),
           ),
         ),
-        // debounceTime: 400,
         itemClick: (City suggestion) async {
           List<Weather> weatherList = await DatabaseHelper().getWeathers();
           bool showAddCartButton = weatherList.isEmpty ||
@@ -124,18 +115,18 @@ class MyHomePage extends StatelessWidget {
           }
         },
         seperatedBuilder: const Divider(
-          color: Colors.transparent,
+          color: transparentColor,
         ),
         containerHorizontalPadding: 10,
         itemBuilder: (context, index, City suggestion) {
           return Container(
             height: MediaQuery.of(context).size.height / 10,
             decoration: BoxDecoration(
-              color: Colors.transparent,
+              color: transparentColor,
               borderRadius: BorderRadius.circular(15),
               boxShadow: const [
                 BoxShadow(
-                  color: Colors.transparent,
+                  color: transparentColor,
                 ),
               ],
             ),
@@ -162,7 +153,7 @@ class MyHomePage extends StatelessWidget {
           );
         },
         isCrossBtnShown: true,
-        textStyle: TextStyle(color: Colors.black.withOpacity(0.8)),
+        textStyle: TextStyle(color: backgroundDark.withOpacity(0.8)),
       ),
     );
   }
@@ -256,8 +247,8 @@ class PopularCityGroup extends StatelessWidget {
             }
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey[200],
-            foregroundColor: Colors.grey,
+            backgroundColor: textColor,
+            foregroundColor: textBackgroundColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20.0),
             ),

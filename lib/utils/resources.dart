@@ -13,7 +13,7 @@ ThemeData get darkTheme => ThemeData.dark(useMaterial3: false).copyWith(
       ),
       colorScheme: ColorScheme.dark(
         primary: primaryColor,
-        onPrimary: Colors.white,
+        onPrimary: textColor!,
         onSurface: backgroundDark,
         secondary: secondaryColor,
         brightness: Brightness.dark,

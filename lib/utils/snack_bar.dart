@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:sky_snap/utils/colors.dart';
 
 void showSnackBar(BuildContext context, String errorData) {
   final snackBar = SnackBar(
-    backgroundColor: Colors.grey,
+    backgroundColor: textBackgroundColor,
     content: Text(
       errorData,
-      style: TextStyle(color: Colors.grey[200]),
+      style: TextStyle(color: textColor),
     ),
   );
   ScaffoldMessenger.of(context).showSnackBar(snackBar);

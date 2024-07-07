@@ -14,16 +14,8 @@ class WeeklyDetailsScreen extends StatelessWidget {
     List<DateTime> targetDates =
         List.generate(5, (index) => today.add(Duration(days: index)));
     return Container(
-        decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color.fromARGB(255, 132, 214, 252),
-                Color.fromARGB(255, 132, 214, 252),
-              ],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
-            color: Colors.lightBlueAccent),
+        decoration:
+            BoxDecoration(gradient: backgroundGradient, color: primaryColor),
         child: Stack(fit: StackFit.expand, children: [
           Image.asset(
             'assets/background_world.png',
@@ -33,14 +25,14 @@ class WeeklyDetailsScreen extends StatelessWidget {
           Scaffold(
             appBar: AppBar(
               automaticallyImplyLeading: true,
-              iconTheme: const IconThemeData(color: Colors.white),
+              iconTheme: IconThemeData(color: textColor),
               title: Text(
                 weatherResponse.name,
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: textColor),
               ),
-              backgroundColor: Colors.transparent,
+              backgroundColor: transparentColor,
             ),
-            backgroundColor: Colors.transparent,
+            backgroundColor: transparentColor,
             body: SingleChildScrollView(
                 child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,11 +52,11 @@ class WeeklyDetailsScreen extends StatelessWidget {
                         height: MediaQuery.of(context).size.height / 3.5,
                         child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.transparent,
+                              color: transparentColor,
                               borderRadius: BorderRadius.circular(15.0),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.blue.withOpacity(0.5),
+                                  color: cardBackgroundColor,
                                 ),
                               ],
                             ),

@@ -66,16 +66,9 @@ class MainScreenView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color.fromARGB(255, 132, 214, 252),
-              Color.fromARGB(255, 132, 214, 252),
-            ],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
-          color: Colors.lightBlueAccent,
+        decoration: BoxDecoration(
+          gradient: backgroundGradient,
+          color: primaryColor,
         ),
         child: Stack(fit: StackFit.expand, children: [
           Image.asset(
@@ -94,7 +87,7 @@ class MainScreenView extends StatelessWidget {
                       state.weatherList.isEmpty ? 1 : state.weatherList.length;
                   return Scaffold(
                     appBar: _buildAppBar(context, state.weatherList),
-                    backgroundColor: Colors.transparent,
+                    backgroundColor: transparentColor,
                     floatingActionButtonLocation:
                         FloatingActionButtonLocation.centerFloat,
                     floatingActionButton: _buildFloatingActionButton(
@@ -116,7 +109,7 @@ class MainScreenView extends StatelessWidget {
                 });
               } else if (state is WeatherError) {
                 return Scaffold(
-                    backgroundColor: Colors.transparent,
+                    backgroundColor: transparentColor,
                     appBar: buildAppBar(context),
                     body: Center(
                         child: EmptyWidget(
@@ -134,10 +127,10 @@ class MainScreenView extends StatelessWidget {
   AppBar buildAppBar(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: !fromMain,
-      iconTheme: const IconThemeData(color: Colors.white),
-      title: const Text(
+      iconTheme: IconThemeData(color: textColor),
+      title: Text(
         'Sky Snap',
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: textColor),
       ),
       leading: !fromMain
           ? null
@@ -145,12 +138,12 @@ class MainScreenView extends StatelessWidget {
               onPressed: () {
                 startScreen(context, ManageCityScreen());
               },
-              icon: const Icon(
+              icon: Icon(
                 Icons.add_outlined,
-                color: Colors.white,
+                color: textColor,
               ),
             ),
-      backgroundColor: Colors.transparent,
+      backgroundColor: transparentColor,
     );
   }
 
@@ -160,16 +153,16 @@ class MainScreenView extends StatelessWidget {
         ? BlocBuilder<ShowBackCubit, bool>(builder: (context, back) {
             return Container(
               decoration: BoxDecoration(
-                color: Colors.transparent,
+                color: transparentColor,
                 borderRadius: BorderRadius.circular(25.0),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey[200]!,
+                    color: textColor!,
                   ),
                 ],
               ),
               child: FloatingActionButton.extended(
-                backgroundColor: Colors.transparent,
+                backgroundColor: transparentColor,
                 elevation: 0,
                 onPressed: () async {
                   if (back) {
@@ -196,10 +189,10 @@ class MainScreenView extends StatelessWidget {
                 },
                 label: Text(
                   back ? 'View on start page' : 'Add to start page',
-                  style: const TextStyle(color: Colors.grey),
+                  style: const TextStyle(color: textBackgroundColor),
                 ),
                 icon: Icon(back ? Icons.arrow_back_ios_new : Icons.add,
-                    color: Colors.grey, size: 25),
+                    color: textBackgroundColor, size: 25),
               ),
             );
           })
@@ -210,10 +203,10 @@ class MainScreenView extends StatelessWidget {
     int currentPageIndex = BlocProvider.of<PageCubit>(context).getPage();
     return AppBar(
       automaticallyImplyLeading: !fromMain,
-      iconTheme: const IconThemeData(color: Colors.white),
+      iconTheme: IconThemeData(color: textColor),
       title: Text(
         weatherList[currentPageIndex].name,
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(color: textColor),
       ),
       leading: !fromMain
           ? null
@@ -232,12 +225,12 @@ class MainScreenView extends StatelessWidget {
                           fromMain: fromMain));
                 });
               },
-              icon: const Icon(
+              icon: Icon(
                 Icons.add_outlined,
-                color: Colors.white,
+                color: textColor,
               ),
             ),
-      backgroundColor: Colors.transparent,
+      backgroundColor: transparentColor,
     );
   }
 
@@ -249,8 +242,8 @@ class MainScreenView extends StatelessWidget {
           child: PageViewDotIndicator(
             currentItem: pageIndex,
             count: pageCount,
-            unselectedColor: Colors.black26,
-            selectedColor: Colors.amber,
+            unselectedColor: textBackgroundColor,
+            selectedColor: textColor!,
             duration: const Duration(milliseconds: 200),
             size: const Size(5, 5),
             boxShape: BoxShape.circle,
@@ -367,11 +360,11 @@ class MainScreenView extends StatelessWidget {
       height: MediaQuery.of(context).size.height / 2.75,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.transparent,
+          color: transparentColor,
           borderRadius: BorderRadius.circular(15.0),
           boxShadow: [
             BoxShadow(
-              color: Colors.blue.withOpacity(0.5),
+              color: cardBackgroundColor,
             ),
           ],
         ),
@@ -388,7 +381,7 @@ class MainScreenView extends StatelessWidget {
                     toTitleCase(filterDataForDate(date, weatherResponse)
                         .first
                         .description),
-                    '${filterDataForDate(date, weatherResponse).first.tempMin.toInt()}/${filterDataForDate(date, weatherResponse).first.tempMax.toInt()}',
+                    '${filterDataForDate(date, weatherResponse).first.tempMin.toInt()}\u00b0 / ${filterDataForDate(date, weatherResponse).first.tempMax.toInt()}\u00b0',
                     filterDataForDate(date, weatherResponse).first.icon),
               ]
             ],
@@ -428,7 +421,7 @@ class MainScreenView extends StatelessWidget {
               height: 20,
               width: 20,
               decoration: BoxDecoration(
-                color: Colors.transparent,
+                color: transparentColor,
                 borderRadius: BorderRadius.circular(25.0),
                 boxShadow: const [
                   BoxShadow(
@@ -439,7 +432,7 @@ class MainScreenView extends StatelessWidget {
               child: const Icon(
                 Icons.calendar_month_outlined,
                 size: 12,
-                color: Colors.grey,
+                color: textBackgroundColor,
               ),
             ),
             const SizedBox(width: 10),
@@ -517,11 +510,11 @@ class MainScreenView extends StatelessWidget {
       height: MediaQuery.of(context).size.height / 3.5,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.transparent,
+          color: transparentColor,
           borderRadius: BorderRadius.circular(15.0),
           boxShadow: [
             BoxShadow(
-              color: Colors.blue.withOpacity(0.5),
+              color: cardBackgroundColor,
             ),
           ],
         ),
@@ -572,11 +565,11 @@ class MainScreenView extends StatelessWidget {
                   child: Container(
                       width: MediaQuery.of(context).size.width / 2.2,
                       decoration: BoxDecoration(
-                        color: Colors.transparent,
+                        color: transparentColor,
                         borderRadius: BorderRadius.circular(15.0),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.blue.withOpacity(0.5),
+                            color: cardBackgroundColor,
                           ),
                         ],
                       ),
@@ -607,11 +600,11 @@ class MainScreenView extends StatelessWidget {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.transparent,
+                      color: transparentColor,
                       borderRadius: BorderRadius.circular(15.0),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.blue.withOpacity(0.5),
+                          color: cardBackgroundColor,
                         ),
                       ],
                     ),
@@ -627,7 +620,7 @@ class MainScreenView extends StatelessWidget {
                               Text(weather.sunrise),
                             ],
                           ),
-                          const Divider(color: Colors.white, thickness: 0.2),
+                          Divider(color: textColor, thickness: 0.2),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -647,11 +640,11 @@ class MainScreenView extends StatelessWidget {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.transparent,
+                color: transparentColor,
                 borderRadius: BorderRadius.circular(15.0),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.blue.withOpacity(0.5),
+                    color: cardBackgroundColor,
                   ),
                 ],
               ),
@@ -667,7 +660,7 @@ class MainScreenView extends StatelessWidget {
                         Text("${weather.humidity}%"),
                       ],
                     ),
-                    const Divider(color: Colors.white, thickness: 0.2),
+                    Divider(color: textColor, thickness: 0.2),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -677,7 +670,7 @@ class MainScreenView extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const Divider(color: Colors.white, thickness: 0.2),
+                    Divider(color: textColor, thickness: 0.2),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -685,7 +678,7 @@ class MainScreenView extends StatelessWidget {
                         Text("${weather.uv}"),
                       ],
                     ),
-                    const Divider(color: Colors.white, thickness: 0.2),
+                    Divider(color: textColor, thickness: 0.2),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -693,7 +686,7 @@ class MainScreenView extends StatelessWidget {
                         Text("${weather.pressure}mbar"),
                       ],
                     ),
-                    const Divider(color: Colors.white, thickness: 0.2),
+                    Divider(color: textColor, thickness: 0.2),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -701,7 +694,7 @@ class MainScreenView extends StatelessWidget {
                         Text("${weather.chanceOfRain.toStringAsFixed(0)}%"),
                       ],
                     ),
-                    const Divider(color: Colors.white, thickness: 0.2),
+                    Divider(color: textColor, thickness: 0.2),
                   ],
                 ),
               ),
@@ -740,7 +733,7 @@ class WindDirectionPainter extends CustomPainter {
     const Offset center = Offset(150 / 5, 150 / 5);
 
     Paint circlePaint = Paint()
-      ..color = Colors.grey[300]!
+      ..color = textColor!
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
     canvas.drawCircle(center, radius, circlePaint);
@@ -821,16 +814,16 @@ class _TemperatureDisplay extends StatelessWidget {
       children: [
         Text(
           "${weather.temp.toInt()}\u00b0",
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 100,
             fontWeight: FontWeight.w400,
-            color: Colors.white,
+            color: textColor,
           ),
         ),
         Text(
           "${toTitleCase(weather.description)}   ${weather.tempMin.toInt()} / ${weather.tempMax.toInt()}",
-          style: const TextStyle(
-              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+          style: TextStyle(
+              color: textColor, fontWeight: FontWeight.bold, fontSize: 18),
         ),
       ],
     );

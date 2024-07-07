@@ -23,16 +23,9 @@ class ManageCityScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Color.fromARGB(255, 132, 214, 252),
-            Color.fromARGB(255, 132, 214, 252),
-          ],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-        color: Colors.lightBlueAccent,
+      decoration: BoxDecoration(
+        gradient: backgroundGradient,
+        color: primaryColor,
       ),
       child: Stack(
         fit: StackFit.expand,
@@ -45,14 +38,14 @@ class ManageCityScreen extends StatelessWidget {
           Scaffold(
             appBar: AppBar(
               automaticallyImplyLeading: true,
-              iconTheme: const IconThemeData(color: Colors.white),
-              title: const Text(
+              iconTheme: IconThemeData(color: textColor),
+              title: Text(
                 'Manage Cities',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: textColor),
               ),
-              backgroundColor: Colors.transparent,
+              backgroundColor: transparentColor,
             ),
-            backgroundColor: Colors.transparent,
+            backgroundColor: transparentColor,
             body: SingleChildScrollView(
               child: Column(
                 children: [
@@ -70,18 +63,17 @@ class ManageCityScreen extends StatelessWidget {
                         height: 40,
                         padding: const EdgeInsets.symmetric(horizontal: 15),
                         decoration: BoxDecoration(
-                          color: Colors.grey[200],
+                          color: textColor,
                           borderRadius: BorderRadius.circular(20),
-                          border:
-                              Border.all(color: Colors.transparent, width: 0),
+                          border: Border.all(color: transparentColor, width: 0),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.search_rounded, color: Colors.grey[600]),
+                            Icon(Icons.search_rounded, color: disableColor),
                             const SizedBox(width: 10),
                             Text(
                               'Enter location',
-                              style: TextStyle(color: Colors.grey[600]),
+                              style: TextStyle(color: disableColor),
                             ),
                           ],
                         ),
@@ -123,11 +115,11 @@ class ManageCityScreen extends StatelessWidget {
                               child: Container(
                                 height: MediaQuery.of(context).size.height / 8,
                                 decoration: BoxDecoration(
-                                  color: Colors.transparent,
+                                  color: transparentColor,
                                   borderRadius: BorderRadius.circular(15.0),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.blue.withOpacity(0.5),
+                                      color: primaryColor.withOpacity(0.5),
                                     ),
                                   ],
                                 ),

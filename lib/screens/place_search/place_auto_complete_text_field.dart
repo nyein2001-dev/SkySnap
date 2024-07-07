@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sky_snap/api/models/city.dart';
 import 'package:sky_snap/screens/place_search/bloc/place_auto_complete_bloc.dart';
+import 'package:sky_snap/utils/colors.dart';
 import 'package:sky_snap/utils/navigation.dart';
 import 'package:sky_snap/utils/snack_bar.dart';
 
@@ -120,8 +121,8 @@ class _PlaceAutoCompleteTextFieldState
                         child: Text(
                           'Cancel',
                           style: TextStyle(
-                            color: Colors.blue,
-                            fontSize: 15,
+                            color: primaryColor,
+                            fontSize: 17,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -187,7 +188,7 @@ class _PlaceAutoCompleteTextFieldState
             link: _layerLink,
             offset: Offset(0.0, size.height + 5.0),
             child: Material(
-              color: Colors.transparent,
+              color: transparentColor,
               child: isLoading
                   ? Padding(
                       padding: EdgeInsets.only(

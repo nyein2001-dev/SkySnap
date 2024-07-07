@@ -116,6 +116,21 @@ class DatabaseHelper {
   //   );
   // }
 
+  Future<Weather?> getWeatherByName(String name) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'weather',
+      where: 'name = ?',
+      whereArgs: [name],
+    );
+
+    if (maps.isNotEmpty) {
+      return Weather.fromSharedJson(maps.first);
+    }
+
+    return null;
+  }
+
   Future<List<Weather>> getWeathers() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('weather');

@@ -1,6 +1,8 @@
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sky_snap/screens/place_details/manage_city_screen.dart';
+import 'package:sky_snap/utils/colors.dart';
 import 'package:sky_snap/utils/navigation.dart';
 
 class LoadingWidget extends StatelessWidget {
@@ -10,17 +12,41 @@ class LoadingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _buildAppBar(context),
-      backgroundColor: Colors.transparent,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: _buildPageView(context),
-            ),
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color.fromARGB(255, 132, 214, 252),
+            Color.fromARGB(255, 132, 214, 252),
           ],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
         ),
+        color: primaryColor,
+      ),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            'assets/background_world.png',
+            fit: BoxFit.fitHeight,
+            color: primaryColor.withOpacity(0.5),
+          ),
+          Scaffold(
+            appBar: _buildAppBar(context),
+            backgroundColor: transparentColor,
+            body: SafeArea(
+              child: Column(
+                children: [
+                  Expanded(
+                    child: _buildPageView(),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -28,10 +54,10 @@ class LoadingWidget extends StatelessWidget {
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: !fromMain,
-      iconTheme: const IconThemeData(color: Colors.white),
-      title: const Text(
+      iconTheme: IconThemeData(color: textColor),
+      title: Text(
         'Sky Snap',
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: textColor),
       ),
       leading: !fromMain
           ? null
@@ -39,100 +65,164 @@ class LoadingWidget extends StatelessWidget {
               onPressed: () {
                 startScreen(context, ManageCityScreen());
               },
-              icon: const Icon(
+              icon: Icon(
                 Icons.add_outlined,
-                color: Colors.white,
+                color: textColor,
               ),
             ),
-      backgroundColor: Colors.transparent,
+      backgroundColor: transparentColor,
     );
   }
 
-  Widget _buildPageView(BuildContext context) {
-    return _buildPageContent(context);
+  Widget _buildPageView() {
+    return PageView.builder(
+      controller: PageController(),
+      onPageChanged: (page) {},
+      itemCount: 1,
+      itemBuilder: (context, index) {
+        return _buildPageContent(
+          context,
+        );
+      },
+    );
+  }
+
+  Widget _buildForecastHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Row(
+          children: [
+            Container(
+              height: 20,
+              width: 20,
+              decoration: BoxDecoration(
+                color: transparentColor,
+                borderRadius: BorderRadius.circular(25.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: cardBackgroundColor,
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.calendar_month_outlined,
+                size: 12,
+                color: textBackgroundColor,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              '5-day forecast',
+              style: TextStyle(fontWeight: FontWeight.bold, color: textColor),
+            ),
+          ],
+        ),
+        InkWell(
+          child: const Row(
+            children: [
+              Text('More details'),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 12,
+              ),
+            ],
+          ),
+          onTap: () {},
+        ),
+      ],
+    );
   }
 
   Widget _buildPageContent(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: Column(
-          children: [
-            Shimmer.fromColors(
-              baseColor: Colors.grey[300]!,
-              highlightColor: Colors.grey[100]!,
-              child: Container(
-                width: MediaQuery.of(context).size.height / 2,
-                height: 200,
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(15.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.blue.withOpacity(0.5),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
+    return EasyRefresh(
+      controller: EasyRefreshController(),
+      refreshOnStart: false,
+      header: const ClassicHeader(),
+      footer: null,
+      onRefresh: () {},
+      onLoad: () async {},
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Column(
+            children: [
+              Shimmer.fromColors(
+                  baseColor: shimer300!,
+                  highlightColor: shimer100!,
+                  child: Container(
+                    height: MediaQuery.of(context).size.height / 4,
+                    decoration: BoxDecoration(
+                      color: transparentColor,
+                      borderRadius: BorderRadius.circular(15.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: cardBackgroundColor,
+                        ),
+                      ],
+                    ),
+                  )),
+              const SizedBox(height: 10),
+              _buildForecastContainer(context),
+              const SizedBox(height: 10),
+              const SizedBox(height: 10),
+              _buildWeatherDetailsRow(context),
+              const SizedBox(height: 10),
+              const Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "SkySnap has been developed by ",
+                      style: TextStyle(
+                        fontSize: 8,
+                      ),
+                    ),
+                    Text(
+                      " 🌐 Nyein Chan Toe",
+                      style: TextStyle(
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            _buildForecastContainer(context),
-            const SizedBox(height: 20),
-            _buildWeatherDetailsRow(context),
-            const SizedBox(height: 20),
-            const Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "SkySnap has been developed by ",
-                    style: TextStyle(
-                      fontSize: 8,
-                    ),
-                  ),
-                  Text(
-                    " 🌐 Nyein Chan Toe",
-                    style: TextStyle(
-                      fontSize: 8,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildForecastContainer(BuildContext context) {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height / 2.75,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(15.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.blue.withOpacity(0.5),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: const Padding(
-          padding: EdgeInsets.all(10),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [Expanded(child: ShimmerLoadingWidget())],
+    return Shimmer.fromColors(
+        baseColor: shimer300!,
+        highlightColor: shimer100!,
+        child: Container(
+          height: MediaQuery.of(context).size.height / 2.75,
+          decoration: BoxDecoration(
+            color: transparentColor,
+            borderRadius: BorderRadius.circular(15.0),
+            boxShadow: [
+              BoxShadow(
+                color: cardBackgroundColor,
+              ),
+            ],
           ),
-        ),
-      ),
-    );
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _buildForecastHeader(),
+                const Expanded(child: ShimmerLoadingWidget())
+              ],
+            ),
+          ),
+        ));
   }
 
   Widget _buildWeatherDetailsRow(BuildContext context) {
@@ -149,18 +239,16 @@ class LoadingWidget extends StatelessWidget {
               children: [
                 Expanded(
                     child: Shimmer.fromColors(
-                        baseColor: Colors.grey[300]!,
-                        highlightColor: Colors.grey[100]!,
+                        baseColor: shimer300!,
+                        highlightColor: shimer100!,
                         child: Container(
                           width: MediaQuery.of(context).size.width / 2.2,
                           decoration: BoxDecoration(
-                            color: Colors.transparent,
+                            color: transparentColor,
                             borderRadius: BorderRadius.circular(15.0),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.blue.withOpacity(0.5),
-                                blurRadius: 10,
-                                offset: const Offset(0, 5),
+                                color: cardBackgroundColor,
                               ),
                             ],
                           ),
@@ -168,17 +256,15 @@ class LoadingWidget extends StatelessWidget {
                 const SizedBox(height: 10),
                 Expanded(
                     child: Shimmer.fromColors(
-                        baseColor: Colors.grey[300]!,
-                        highlightColor: Colors.grey[100]!,
+                        baseColor: shimer300!,
+                        highlightColor: shimer100!,
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.transparent,
+                            color: transparentColor,
                             borderRadius: BorderRadius.circular(15.0),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.blue.withOpacity(0.5),
-                                blurRadius: 10,
-                                offset: const Offset(0, 5),
+                                color: cardBackgroundColor,
                               ),
                             ],
                           ),
@@ -189,17 +275,15 @@ class LoadingWidget extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
               child: Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
+                  baseColor: shimer300!,
+                  highlightColor: shimer100!,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.transparent,
+                      color: transparentColor,
                       borderRadius: BorderRadius.circular(15.0),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.blue.withOpacity(0.5),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
+                          color: cardBackgroundColor,
                         ),
                       ],
                     ),
@@ -216,8 +300,8 @@ class ShimmerLoadingWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+      baseColor: shimer300!,
+      highlightColor: shimer100!,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -243,15 +327,8 @@ class ShimmerLoadingWidget extends StatelessWidget {
       width: width ?? MediaQuery.of(context).size.width,
       height: height,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: textBackgroundColor ,
         borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blue.withOpacity(0.5),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
       ),
     );
   }
