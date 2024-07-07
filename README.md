@@ -18,6 +18,8 @@ SkySnap is a simple and intuitive weather application built using Flutter. It pr
  
   # Folder Structure
 
+```sql
+
 lib/
 ├── api/
 │   ├── models/
@@ -66,6 +68,8 @@ lib/
 ├── widgets/
 │   ├── empty_widget.dart
 ├── main.dart
+
+```
 
 ---
  
