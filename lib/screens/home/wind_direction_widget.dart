@@ -4,11 +4,11 @@ import 'dart:math' as math;
 
 import 'package:sky_snap/utils/colors.dart';
 
-class WindDirectionCircle extends StatelessWidget {
+class WindDirectionWidget extends StatelessWidget {
   final String direction;
   final Weather weather;
 
-  const WindDirectionCircle(
+  const WindDirectionWidget(
       {super.key, required this.direction, required this.weather});
 
   @override

@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sky_snap/api/models/city.dart';
 import 'package:sky_snap/api/models/weather.dart';
 import 'package:sky_snap/api/models/hourly_weather.dart';
-import 'package:sky_snap/api/servers_http.dart';
+import 'package:sky_snap/api/services/servers_http.dart';
 import 'package:sky_snap/utils/database_helper.dart';
 import 'package:sky_snap/utils/network_info.dart';
 
@@ -55,15 +55,18 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
       RefreshWeather event, Emitter<WeatherState> emit) async {
     try {
       City city = event.city;
-      Weather? initialWeather =
-          await DatabaseHelper().getWeatherByName(city.name);
-      WeatherResponse? initialResponse =
-          await DatabaseHelper().getWeatherResponse(city.name);
-      if (initialWeather != null && initialResponse != null) {
-        emit(WeatherLoaded(
-            weatherList: [initialWeather],
-            weatherResponseList: [initialResponse]));
+      if (!event.fromMain) {
+        Weather? initialWeather =
+            await DatabaseHelper().getWeatherByName(city.name);
+        WeatherResponse? initialResponse =
+            await DatabaseHelper().getWeatherResponse(city.name);
+        if (initialWeather != null && initialResponse != null) {
+          emit(WeatherLoaded(
+              weatherList: [initialWeather],
+              weatherResponseList: [initialResponse]));
+        }
       }
+
       bool isConnected = await networkInfo.isConnected;
       if (isConnected) {
         Weather? weather = await ServersHttp()

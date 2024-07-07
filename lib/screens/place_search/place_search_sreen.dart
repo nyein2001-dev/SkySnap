@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sky_snap/api/models/city.dart';
 import 'package:sky_snap/api/models/weather.dart';
-import 'package:sky_snap/screens/main_screen/main_screen.dart';
+import 'package:sky_snap/screens/home/main_screen.dart';
 import 'package:sky_snap/screens/place_search/place_auto_complete_text_field.dart';
 import 'package:sky_snap/utils/colors.dart';
 import 'package:sky_snap/utils/database_helper.dart';
@@ -247,8 +247,13 @@ class PopularCityGroup extends StatelessWidget {
             }
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: textColor,
-            foregroundColor: textBackgroundColor,
+            backgroundColor: cardBackgroundColor,
+            foregroundColor: textColor,
+            disabledForegroundColor: transparentColor,
+            disabledBackgroundColor: transparentColor,
+            shadowColor: transparentColor,
+            surfaceTintColor: transparentColor,
+            overlayColor: transparentColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20.0),
             ),

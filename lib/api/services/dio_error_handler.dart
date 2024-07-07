@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'error_response.dart';
+import '../models/error_response.dart';
 
 class DioErrorHandler {
   ErrorResponse errorResponse = ErrorResponse();

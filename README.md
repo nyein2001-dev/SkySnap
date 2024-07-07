@@ -16,6 +16,59 @@ SkySnap is a simple and intuitive weather application built using Flutter. It pr
  
 ---
  
+  # Folder Structure
+
+lib/
+├── api/
+│   ├── models/
+│   │   ├── city.dart
+│   │   ├── hourly_weather.dart
+│   │   ├── weather.dart
+│   │   └── error_response.dart
+│   ├── services/
+│   │   ├── http_connection.dart
+│   │   ├── servers_http.dart
+│   │   └── dio_error_handler.dart
+├── blocs/
+│   ├── main_screen/
+│   │   ├── page_cubit.dart
+│   │   ├── show_back_cubit.dart
+│   │   ├── weather_bloc.dart
+│   │   ├── weather_event.dart
+│   │   └── weather_state.dart
+│   ├── place_search/
+│   │   ├── place_auto_complete_bloc.dart
+│   │   ├── place_auto_complete_event.dart
+│   │   └── place_auto_complete_state.dart
+├── screens/
+│   ├── home/
+│   │   ├── main_screen.dart
+│   │   ├── wind_direction_widget.dart
+│   │   └── weather_loading_widget.dart
+│   ├── place_search/
+│   │   ├── place_search_screen.dart
+│   │   ├── place_auto_complete_text_field.dart
+│   │   └── city_management_screen.dart
+│   ├── place_details/
+│   │   ├── weekly_details_screen.dart
+│   │   └── line_chart_widget.dart
+│   ├── splash/
+│   │   └── splash_screen.dart
+├── utils/
+│   ├── colors.dart
+│   ├── database_helper.dart
+│   ├── navigation.dart
+│   ├── network_info.dart
+│   ├── resources.dart
+│   ├── snack_bar.dart
+│   ├── strings.dart
+│   ├── weather_icon.dart
+├── widgets/
+│   ├── empty_widget.dart
+├── main.dart
+
+---
+ 
   # Weather Database Structure
 
 This document explains the structure of the SQLite database used in the weather application. The database consists of three tables: `weather`, `weather_response`, and `weather_data`. Below is a flow chart illustrating the relationships between these tables.

@@ -5,13 +5,13 @@ import 'package:page_view_dot_indicator/page_view_dot_indicator.dart';
 import 'package:sky_snap/api/models/city.dart';
 import 'package:sky_snap/api/models/hourly_weather.dart';
 import 'package:sky_snap/api/models/weather.dart';
-import 'package:sky_snap/screens/main_screen/bloc/page_cubit.dart';
-import 'package:sky_snap/screens/main_screen/bloc/show_back_cubit.dart';
-import 'package:sky_snap/screens/main_screen/bloc/weather_bloc.dart';
-import 'package:sky_snap/screens/main_screen/shimmer_loading_widget.dart';
-import 'package:sky_snap/screens/main_screen/wind_direction_circle.dart';
+import 'package:sky_snap/blocs/main_screen/page_cubit.dart';
+import 'package:sky_snap/blocs/main_screen/show_back_cubit.dart';
+import 'package:sky_snap/blocs/main_screen/weather_bloc.dart';
+import 'package:sky_snap/screens/home/weather_loading_widget.dart';
+import 'package:sky_snap/screens/home/wind_direction_widget.dart';
 import 'package:sky_snap/screens/place_details/line_chart_widget.dart';
-import 'package:sky_snap/screens/place_details/manage_city_screen.dart';
+import 'package:sky_snap/screens/place_search/city_management_screen.dart';
 import 'package:sky_snap/screens/place_details/weekly_details_screen.dart';
 import 'package:sky_snap/utils/colors.dart';
 import 'package:sky_snap/utils/database_helper.dart';
@@ -79,34 +79,41 @@ class MainScreenView extends StatelessWidget {
           BlocBuilder<WeatherBloc, WeatherState>(
             builder: (context, state) {
               if (state is WeatherLoading) {
-                return Center(child: LoadingWidget(fromMain: fromMain));
+                return Center(child: WeatherLoadingWidget(fromMain: fromMain));
               } else if (state is WeatherLoaded) {
-                return BlocBuilder<PageCubit, int>(
-                    builder: (context, pageIndex) {
-                  int pageCount =
-                      state.weatherList.isEmpty ? 1 : state.weatherList.length;
-                  return Scaffold(
-                    appBar: _buildAppBar(context, state.weatherList),
-                    backgroundColor: transparentColor,
-                    floatingActionButtonLocation:
-                        FloatingActionButtonLocation.centerFloat,
-                    floatingActionButton: _buildFloatingActionButton(
-                        context, state.weatherList, state.weatherResponseList),
-                    body: SafeArea(
-                      child: Column(
-                        children: [
-                          if (pageCount > 1 && fromMain)
-                            _buildPageIndicator(pageCount),
-                          Expanded(
-                            child: _buildPageView(context, state.weatherList,
-                                state.weatherResponseList, pageIndex),
-                          ),
-                          const SizedBox(height: 16),
-                        ],
+                if (state.weatherList.isNotEmpty &&
+                    state.weatherResponseList.isNotEmpty) {
+                  return BlocBuilder<PageCubit, int>(
+                      builder: (context, pageIndex) {
+                    int pageCount = state.weatherList.isEmpty
+                        ? 1
+                        : state.weatherList.length;
+                    return Scaffold(
+                      appBar: _buildAppBar(context, state.weatherList),
+                      backgroundColor: transparentColor,
+                      floatingActionButtonLocation:
+                          FloatingActionButtonLocation.centerFloat,
+                      floatingActionButton: _buildFloatingActionButton(context,
+                          state.weatherList, state.weatherResponseList),
+                      body: SafeArea(
+                        child: Column(
+                          children: [
+                            if (pageCount > 1 && fromMain)
+                              _buildPageIndicator(pageCount),
+                            Expanded(
+                              child: _buildPageView(context, state.weatherList,
+                                  state.weatherResponseList, pageIndex),
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                });
+                    );
+                  });
+                } else {
+                  return Center(
+                      child: WeatherLoadingWidget(fromMain: fromMain));
+                }
               } else if (state is WeatherError) {
                 return Scaffold(
                     backgroundColor: transparentColor,
@@ -136,7 +143,7 @@ class MainScreenView extends StatelessWidget {
           ? null
           : IconButton(
               onPressed: () {
-                startScreen(context, ManageCityScreen());
+                startScreen(context, CityManagementScreen());
               },
               icon: Icon(
                 Icons.add_outlined,
@@ -212,7 +219,7 @@ class MainScreenView extends StatelessWidget {
           ? null
           : IconButton(
               onPressed: () {
-                startScreen(context, ManageCityScreen()).then((v) async {
+                startScreen(context, CityManagementScreen()).then((v) async {
                   BlocProvider.of<WeatherBloc>(context).add(
                       LoadWeatherFromDatabase(
                           showLoading: false,
@@ -580,7 +587,7 @@ class MainScreenView extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            WindDirectionCircle(
+                            WindDirectionWidget(
                               direction: weather.windDirection,
                               weather: weather,
                             ),

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:sky_snap/api/models/city.dart';
 import 'package:sky_snap/api/models/weather.dart';
-import 'package:sky_snap/screens/home/place_search_sreen.dart';
-import 'package:sky_snap/screens/main_screen/main_screen.dart';
+import 'package:sky_snap/screens/place_search/place_search_sreen.dart';
+import 'package:sky_snap/screens/home/main_screen.dart';
 import 'package:sky_snap/utils/colors.dart';
 import 'package:sky_snap/utils/database_helper.dart';
 import 'package:sky_snap/utils/navigation.dart';
 import 'package:sky_snap/utils/weather_icon.dart';
 
-class ManageCityScreen extends StatelessWidget {
-  ManageCityScreen({super.key}) {
+class CityManagementScreen extends StatelessWidget {
+  CityManagementScreen({super.key}) {
     init();
   }
 
@@ -119,7 +119,7 @@ class ManageCityScreen extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(15.0),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: primaryColor.withOpacity(0.5),
+                                      color: cardBackgroundColor,
                                     ),
                                   ],
                                 ),

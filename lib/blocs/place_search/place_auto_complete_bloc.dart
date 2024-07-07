@@ -2,7 +2,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sky_snap/api/models/city.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:sky_snap/api/servers_http.dart';
+import 'package:sky_snap/api/services/servers_http.dart';
 import 'package:sky_snap/utils/network_info.dart';
 
 part 'place_auto_complete_event.dart';

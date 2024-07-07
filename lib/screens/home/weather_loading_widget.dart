@@ -1,14 +1,14 @@
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:sky_snap/screens/place_details/manage_city_screen.dart';
+import 'package:sky_snap/screens/place_search/city_management_screen.dart';
 import 'package:sky_snap/utils/colors.dart';
 import 'package:sky_snap/utils/navigation.dart';
 
-class LoadingWidget extends StatelessWidget {
+class WeatherLoadingWidget extends StatelessWidget {
   final bool fromMain;
 
-  const LoadingWidget({super.key, required this.fromMain});
+  const WeatherLoadingWidget({super.key, required this.fromMain});
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +63,7 @@ class LoadingWidget extends StatelessWidget {
           ? null
           : IconButton(
               onPressed: () {
-                startScreen(context, ManageCityScreen());
+                startScreen(context, CityManagementScreen());
               },
               icon: Icon(
                 Icons.add_outlined,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sky_snap/api/models/city.dart';
-import 'package:sky_snap/screens/place_search/bloc/place_auto_complete_bloc.dart';
+import 'package:sky_snap/blocs/place_search/place_auto_complete_bloc.dart';
 import 'package:sky_snap/utils/colors.dart';
 import 'package:sky_snap/utils/navigation.dart';
 import 'package:sky_snap/utils/snack_bar.dart';

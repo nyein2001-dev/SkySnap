@@ -1,4 +1,4 @@
-import 'package:sky_snap/api/http_connection.dart';
+import 'package:sky_snap/api/services/http_connection.dart';
 import 'package:sky_snap/api/models/city.dart';
 import 'package:sky_snap/api/models/hourly_weather.dart';
 import 'package:sky_snap/api/models/weather.dart';
