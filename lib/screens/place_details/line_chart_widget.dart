@@ -1,56 +1,32 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:sky_snap/api/models/hourly_weather.dart';
+import 'package:sky_snap/utils/colors.dart';
 import 'package:sky_snap/utils/weather_icon.dart';
 
-class LineChartWidget extends StatefulWidget {
+class LineChartWidget extends StatelessWidget {
   final List<WeatherData> weatherDataList;
+
   const LineChartWidget({super.key, required this.weatherDataList});
 
   @override
-  State<LineChartWidget> createState() => _LineChartWidgetState();
-}
+  Widget build(BuildContext context) {
+    List<int> temperatures =
+        weatherDataList.map((data) => data.temp.toInt()).toList();
+    List<String> windSpeeds = weatherDataList
+        .map((data) => "${data.windSpeedKmh.toStringAsFixed(2)} km/h")
+        .toList();
+    List<String> times =
+        weatherDataList.map((data) => _formatTimestamp(data.dt)).toList();
+    List<String> iconCode = weatherDataList.map((data) => data.icon).toList();
 
-class _LineChartWidgetState extends State<LineChartWidget> {
-  List<Color> gradientColors = [
-    Colors.amber,
-    Colors.yellow,
-  ];
-
-  final List<int> temperatures = [];
-  final List<String> windSpeeds = [];
-  final List<String> times = [];
-  final List<String> iconCode = [];
-  int smallestTemperature = 100;
-  int temperatureDifference = 0;
-
-  @override
-  void initState() {
-    for (var data in widget.weatherDataList) {
-      temperatures.add(data.temp.toInt());
-      windSpeeds.add("${data.windSpeedKmh.toStringAsFixed(2)} km/h");
-      times.add(_formatTimestamp(data.dt));
-      iconCode.add(data.icon);
-    }
-    smallestTemperature =
+    int smallestTemperature =
         temperatures.reduce((current, next) => current < next ? current : next);
     int largestTemperature =
         temperatures.reduce((current, next) => current > next ? current : next);
+    int temperatureDifference = largestTemperature - smallestTemperature;
 
-    temperatureDifference = largestTemperature - smallestTemperature;
-
-    super.initState();
-  }
-
-  static String _formatTimestamp(int timestamp) {
-    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-    String formattedTime = DateFormat.Hm().format(dateTime);
-    return formattedTime;
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: SizedBox(
@@ -74,7 +50,8 @@ class _LineChartWidgetState extends State<LineChartWidget> {
             SizedBox(
               width: temperatures.length * 100.0,
               height: 50,
-              child: LineChart(mainData()),
+              child: LineChart(mainData(
+                  temperatures, smallestTemperature, temperatureDifference)),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(
@@ -100,7 +77,11 @@ class _LineChartWidgetState extends State<LineChartWidget> {
   List<FlSpot> generateFlSpots(List<int> temperatures, int smallestTemperature,
       int temperatureDifference) {
     List<FlSpot> spots = [];
-    double scale = (temperatureDifference > 4) ? 0.5 : 1;
+    double scale = (temperatureDifference > 8)
+        ? 0.25
+        : (temperatureDifference > 4)
+            ? 0.5
+            : 1;
     double offset = (temperatureDifference > 4) ? 0 : 1;
     double computeYValue(int temperature) {
       return (temperature - smallestTemperature).toDouble() * scale + offset;
@@ -118,7 +99,8 @@ class _LineChartWidgetState extends State<LineChartWidget> {
     return spots;
   }
 
-  LineChartData mainData() {
+  LineChartData mainData(List<int> temperatures, int smallestTemperature,
+      int temperatureDifference) {
     return LineChartData(
       gridData: const FlGridData(
         show: false,
@@ -150,9 +132,7 @@ class _LineChartWidgetState extends State<LineChartWidget> {
           spots: generateFlSpots(
               temperatures, smallestTemperature, temperatureDifference),
           isCurved: true,
-          gradient: LinearGradient(
-            colors: gradientColors,
-          ),
+          gradient: lineChartGradient,
           barWidth: 1.2,
           isStrokeCapRound: true,
           dotData: const FlDotData(
@@ -161,7 +141,7 @@ class _LineChartWidgetState extends State<LineChartWidget> {
           belowBarData: BarAreaData(
             show: false,
             gradient: LinearGradient(
-              colors: gradientColors
+              colors: lineChartGradient.colors
                   .map((color) => color.withOpacity(0.3))
                   .toList(),
             ),
@@ -169,6 +149,12 @@ class _LineChartWidgetState extends State<LineChartWidget> {
         ),
       ],
     );
+  }
+
+  static String _formatTimestamp(int timestamp) {
+    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+    String formattedTime = DateFormat.Hm().format(dateTime);
+    return formattedTime;
   }
 }
 
@@ -222,7 +208,10 @@ class WeatherInfo extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        WeatherIconWidget(code: iconCode, size: 20.0,),
+        WeatherIconWidget(
+          code: iconCode,
+          size: 20.0,
+        ),
         Text(windSpeed),
         Text(time),
       ],

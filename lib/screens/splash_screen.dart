@@ -12,7 +12,7 @@ class SplashScreen extends StatelessWidget {
       decoration:
           BoxDecoration(gradient: secondaryGradient, color: primaryColor),
       child: Scaffold(
-        backgroundColor: Colors.transparent,
+        backgroundColor: transparentColor,
         body: Stack(
           fit: StackFit.expand,
           children: [
@@ -47,7 +47,7 @@ class SplashScreen extends StatelessWidget {
                         appName,
                         style: Theme.of(context).textTheme.titleLarge!.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: textColor,
                               fontSize: 32,
                             ),
                       ),
@@ -56,7 +56,7 @@ class SplashScreen extends StatelessWidget {
                         'Quick, Reliable Weather Info',
                         style: Theme.of(context).textTheme.titleSmall!.copyWith(
                               fontWeight: FontWeight.w400,
-                              color: Colors.white70,
+                              color: textColor!.withOpacity(0.9),
                               fontSize: 18,
                             ),
                       ),
@@ -74,7 +74,7 @@ class SplashScreen extends StatelessWidget {
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall!
-                                  .copyWith(color: Colors.white70),
+                                  .copyWith(color: textColor),
                             );
                           } else {
                             return const SizedBox.shrink();
