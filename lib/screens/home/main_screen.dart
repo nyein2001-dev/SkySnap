@@ -594,7 +594,8 @@ class MainScreenView extends StatelessWidget {
                             Column(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(weather.windDirection),
+                                Text(
+                                    "${weather.windDirection} ${weather.windDeg}°"),
                                 Text(
                                     "${weather.windSpeedKmh.toStringAsFixed(2)} km/h")
                               ],

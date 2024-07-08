@@ -71,7 +71,7 @@ class WindDirectionPainter extends CustomPainter {
         Offset(center.dx + radius + 5, center.dy - textPainter.height / 2);
     textPainter.paint(canvas, eastOffset);
 
-    double angle = weather.windDeg.toDouble();
+    double angle = (weather.windDeg - 90) * (math.pi / 180);
     double arrowLength = radius - textPadding;
 
     Offset arrowStart = Offset(
