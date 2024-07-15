@@ -11,7 +11,7 @@ SkySnap is a simple and intuitive weather application built using Flutter. It pr
 - **24-Hour Forecast**: Line chart showing temperature, pressure, and weather icons.
 - **5-Day Forecast**: General data including min/max temp, pressure, and weather icons.
 - **Detailed 5-Day Forecast**: 24-hour forecast for each day with line charts.
-- **Manage Cities**: Add or remove cities from the main screen pager.
+- **Manage Cities**: Add or remove cities from the main screen pager .
 - **Search Cities**: Autocomplete search suggestions for adding new cities.
  
 ---
