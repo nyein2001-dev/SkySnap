@@ -74,6 +74,20 @@ class CityManagementScreen extends StatelessWidget {
                     builder: (context, selectedCities, child) {
                       return selectedCities.isEmpty
                           ? const SizedBox()
+                          : Center(
+                              child: Text(
+                              selectedCities.length.toString(),
+                              style: TextStyle(
+                                  color: textColor,
+                                  fontSize: 19,
+                                  fontWeight: FontWeight.bold),
+                            ));
+                    }),
+                ValueListenableBuilder<Set<String>>(
+                    valueListenable: selectedCitiesNotifier,
+                    builder: (context, selectedCities, child) {
+                      return selectedCities.isEmpty
+                          ? const SizedBox()
                           : weatherListNotifier.value.length ==
                                   selectedCitiesNotifier.value.length
                               ? IconButton(
@@ -89,6 +103,36 @@ class CityManagementScreen extends StatelessWidget {
               ],
             ),
             backgroundColor: transparentColor,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
+            floatingActionButton: ValueListenableBuilder<Set<String>>(
+                valueListenable: selectedCitiesNotifier,
+                builder: (context, selectedCities, child) {
+                  return selectedCities.isEmpty
+                      ? const SizedBox()
+                      : Container(
+                          decoration: BoxDecoration(
+                            color: transparentColor,
+                            borderRadius: BorderRadius.circular(25.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: textColor!,
+                              ),
+                            ],
+                          ),
+                          child: FloatingActionButton(
+                            onPressed: () async {
+                              DatabaseHelper()
+                                  .deleteSelectedCitiesWeatherData(
+                                      selectedCities)
+                                  .then((_) => init());
+                            },
+                            child: Icon(
+                              Icons.delete_outline_outlined,
+                              color: textColor!,
+                            ),
+                          ));
+                }),
             body: SingleChildScrollView(
               child: Column(
                 children: [

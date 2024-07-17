@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:sky_snap/api/models/hourly_weather.dart';
 import 'package:sqflite/sqflite.dart';
@@ -248,5 +249,50 @@ class DatabaseHelper {
     } else {
       await insertWeatherResponse(response);
     }
+  }
+
+  Future<void> deleteWeatherByCity(String city) async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> weatherEntries = await db.query(
+      'weather',
+      where: 'name = ?',
+      whereArgs: [city],
+    );
+
+    for (var entry in weatherEntries) {
+      int weatherId = entry['id'];
+
+      await db.delete(
+        'weather_data',
+        where: 'response_id = ?',
+        whereArgs: [weatherId],
+      );
+
+      await db.delete(
+        'weather_response',
+        where: 'id = ?',
+        whereArgs: [weatherId],
+      );
+    }
+
+    await db.delete(
+      'weather',
+      where: 'name = ?',
+      whereArgs: [city],
+    );
+  }
+
+  Future<void> deleteSelectedCitiesWeatherData(
+      Set<String> selectedCities) async {
+    for (String city in selectedCities) {
+      await deleteWeatherByCity(city);
+    }
+  }
+
+  void deleteWeatherDataForSelectedCities(
+      {required ValueNotifier<Set<String>> selectedCitiesNotifier}) async {
+    final selectedCities = selectedCitiesNotifier.value;
+    await deleteSelectedCitiesWeatherData(selectedCities);
   }
 }
