@@ -20,6 +20,7 @@ class CityManagementScreen extends StatelessWidget {
       ValueNotifier<Set<String>>({});
 
   void init() async {
+    selectedCitiesNotifier.value = {};
     weatherListNotifier.value = await DatabaseHelper().getWeathers();
   }
 
