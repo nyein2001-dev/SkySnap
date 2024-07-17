@@ -24,7 +24,12 @@ class CityManagementScreen extends StatelessWidget {
   }
 
   void onCityLongPressed(String cityName) {
-    selectedCitiesNotifier.value = {...selectedCitiesNotifier.value, cityName};
+    if (cityName != "Mumbai") {
+      selectedCitiesNotifier.value = {
+        ...selectedCitiesNotifier.value,
+        cityName
+      };
+    }
   }
 
   void onCityPressed(String cityName) {
@@ -35,7 +40,10 @@ class CityManagementScreen extends StatelessWidget {
 
   void allCitySelected() {
     final weatherList = weatherListNotifier.value;
-    final allCityNames = weatherList.map((weather) => weather.name).toSet();
+    final allCityNames = weatherList
+        .where((weather) => weather.name != "Mumbai")
+        .map((weather) => weather.name)
+        .toSet();
     selectedCitiesNotifier.value = {};
     selectedCitiesNotifier.value = allCityNames;
   }
@@ -89,7 +97,7 @@ class CityManagementScreen extends StatelessWidget {
                       return selectedCities.isEmpty
                           ? const SizedBox()
                           : weatherListNotifier.value.length ==
-                                  selectedCitiesNotifier.value.length
+                                  selectedCitiesNotifier.value.length + 1
                               ? IconButton(
                                   onPressed: removeAllSelected,
                                   icon: const Icon(
@@ -144,7 +152,7 @@ class CityManagementScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => MyHomePage()),
-                        );
+                        ).then((_) => init());
                       },
                       child: Container(
                         height: 40,
