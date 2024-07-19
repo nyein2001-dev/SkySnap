@@ -216,6 +216,10 @@ To get started with SkySnap, follow the steps below:
 - Add or remove cities using the manage city screen.
 - Search for new cities and add them to the main screen.
 
+## Repo Activities
+
+![Alt](https://repobeats.axiom.co/api/embed/0d65e4cd9a23707728aec88c8cccb1ae3825f93a.svg "Repobeats analytics image")
+
 ## Contributing
 
 Feel free to submit issues, pull requests, or feature requests. We welcome all contributions to improve SkySnap.
