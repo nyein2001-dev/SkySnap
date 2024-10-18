@@ -2,6 +2,7 @@
   <img src="./assets/logo.png" alt="Art Stream" width="300" height="300">
 </p>
 
+
 # SkySnap
 
 SkySnap is a simple and intuitive weather application built using Flutter. It provides current weather information for any given city using the OpenWeatherMap API. This app is designed with a clean and responsive UI that works seamlessly on both mobile and tablet devices.
